@@ -1,6 +1,6 @@
 # Indexes with\without null values
 By default, PostgreSQL indexes null values and stores them to the generated index.  
-In that way, we need to exclude null values explicitly from index in order to decrease index size and increase write performance.
+In that way, we need to exclude null values explicitly from the index in order to decrease index size and increase write performance.
 
 ## Example
 |   | tablename | indexname             | num_rows | table_size | index_size | unique_idx |
