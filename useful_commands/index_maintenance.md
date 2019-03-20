@@ -96,5 +96,12 @@ join (
   join pg_class ipg ON ipg.oid = x.indexrelid
   join pg_stat_all_indexes psai ON x.indexrelid = psai.indexrelid AND psai.schemaname = 'public'
   where x.indisvalid = false
-) as i on t.tablename = i.ctablename
+) as i on t.tablename = i.ctablename;
+```
+
+### How to fix invalid indexes
+1. Drop index and recreate it
+2. [Reindex](https://postgrespro.ru/docs/postgresql/9.6/sql-reindex)
+```sql
+reindex index i_item_shipment_id;
 ```
