@@ -83,3 +83,18 @@ order by
          pg_relation_size(i.indexrelid) / nullif(idx_scan, 0) desc nulls first,
          pg_relation_size(i.indexrelid) desc
 ```
+
+## Invalid indexes
+```sql
+select t.tablename, i.indexname
+from pg_tables t
+join pg_class c on t.tablename = c.relname
+join (
+  select c.relname AS ctablename, ipg.relname AS indexname
+  from pg_index x
+  join pg_class c ON c.oid = x.indrelid
+  join pg_class ipg ON ipg.oid = x.indexrelid
+  join pg_stat_all_indexes psai ON x.indexrelid = psai.indexrelid AND psai.schemaname = 'public'
+  where x.indisvalid = false
+) as i on t.tablename = i.ctablename
+```
