@@ -6,19 +6,19 @@
 ```sql
 SELECT pg_database_size(current_database());
 ```
-Результат будет представлен как число вида 41809016.  
-**current_database()** — функция, которая возвращает имя текущей базы данных.  
+Результат будет представлен как число вида **41809016**.  
+[current_database()](https://postgrespro.ru/docs/postgrespro/9.5/functions-info) — функция, которая возвращает имя текущей базы данных.  
 
 Вместо неё можно ввести имя текстом:
 ```sql
 SELECT pg_database_size('my_database');
 ```
 
-Для того, чтобы получить информацию в человекочитаемом виде, используем функцию **pg_size_pretty**:
+Для того, чтобы получить информацию в человекочитаемом виде, используем функцию [pg_size_pretty](https://postgrespro.ru/docs/postgrespro/9.5/functions-admin):
 ```sql
 SELECT pg_size_pretty(pg_database_size(current_database()));
 ```
-В результате получим информацию вида 40 Mb.
+В результате получим информацию вида **40 Mb**.
 
 ### Перечень таблиц
 Иногда требуется получить перечень таблиц базы данных. Для этого используем следующий запрос:
@@ -26,7 +26,8 @@ SELECT pg_size_pretty(pg_database_size(current_database()));
 SELECT table_name FROM information_schema.tables
 WHERE table_schema NOT IN ('information_schema','pg_catalog');
 ```
-**information_schema** — стандартная схема базы данных, которая содержит коллекции представлений (views), таких как таблицы, поля и т.д. Представления таблиц содержат информацию обо всех таблицах баз данных.
+[information_schema](https://www.postgresql.org/docs/9.5/information-schema.html) — стандартная схема базы данных, которая содержит коллекции представлений (views), таких как таблицы, поля и т.д.  
+Представления таблиц содержат информацию обо всех таблицах баз данных.
 
 Запрос, описанный ниже, выберет все таблицы из указанной схемы текущей базы данных:
 ```sql
@@ -34,21 +35,21 @@ SELECT table_name FROM information_schema.tables
 WHERE table_schema NOT IN ('information_schema', 'pg_catalog')
 AND table_schema IN('public', 'myschema');
 ```
-В последнем условии IN можно указать имя определенной схемы.
+В последнем условии `IN` можно указать имя определенной схемы.
 
 ### Размер таблицы
 По аналогии с получением размера базы данных размер данных таблицы можно вычислить с помощью соответствующей функции:
 ```sql
 SELECT pg_relation_size('accounts');
 ```
-Функция **pg_relation_size** возвращает объём, который занимает на диске указанный слой заданной таблицы или индекса.
+Функция [pg_relation_size()](https://postgrespro.ru/docs/postgrespro/9.5/functions-admin) возвращает объём, который занимает на диске указанный слой заданной таблицы или индекса.
 
 ### Имя самой большой таблицы
 Для того, чтобы вывести список таблиц текущей базы данных, отсортированный по размеру таблицы, выполним следующий запрос:
 ```sql
 SELECT relname, relpages FROM pg_class ORDER BY relpages DESC;
 ```
-Для того, чтобы вывести информацию о самой большой таблице, ограничим запрос с помощью LIMIT:
+Для того, чтобы вывести информацию о самой большой таблице, ограничим запрос с помощью `LIMIT`:
 ```sql
 SELECT relname, relpages FROM pg_class ORDER BY relpages DESC LIMIT 1;
 ```
