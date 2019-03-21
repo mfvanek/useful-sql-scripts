@@ -1,5 +1,5 @@
 # Index Maintenance
-From [wiki](https://wiki.postgresql.org/wiki/Index_Maintenance)
+Partially based on [wiki](https://wiki.postgresql.org/wiki/Index_Maintenance) and [this video](https://youtu.be/aaecM4wKdhY)
 
 ## Index summary
 ```sql
@@ -107,7 +107,7 @@ reindex index i_item_shipment_id;
 ```
 
 ## Duplicate indexes
-### Version 1
+### For totally identical
 ```sql
 SELECT pg_size_pretty(SUM(pg_relation_size(idx))::BIGINT) AS SIZE,
        (array_agg(idx))[1] AS idx1, (array_agg(idx))[2] AS idx2,
@@ -119,7 +119,7 @@ FROM (
 GROUP BY KEY HAVING COUNT(*)>1
 ORDER BY SUM(pg_relation_size(idx)) DESC;
 ```
-### Version 2
+### For intersecting indexes
 ```sql
 select a.indrelid::regclass as table_name, a.indexrelid::regclass as first_index, b.indexrelid::regclass as second_index
 from (select *, array_to_string(indkey, ' ') as cols from pg_index) as a
@@ -131,4 +131,17 @@ join (select *, array_to_string(indkey, ' ') as cols from pg_index) as b on
      )
   )
 order by a.indrelid;
+```
+### Version 3
+```sql
+select ui.relname as table_name, ui.indexrelname as index_name, ui.idx_scan as index_scans,
+       pg_size_pretty(pg_relation_size(ui.relid)) as table_size,
+       pg_size_pretty(pg_relation_size(ui.indexrelid)) as index_size,
+       t.n_tup_upd + t.n_tup_ins + t.n_tup_del as writes,
+       i.indexdef as create_command
+from pg_stat_user_indexes ui
+join pg_indexes i on (i.indexname = ui.indexrelname and ui.schemaname = i.schemaname)
+join pg_stat_user_tables t on t.relid = ui.relid
+where ui.idx_scan < 50 and i.indexdef !~* 'unique'
+order by ui.relname, ui.indexrelname;
 ```
