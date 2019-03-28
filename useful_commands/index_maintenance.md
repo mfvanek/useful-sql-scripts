@@ -66,6 +66,20 @@ WHERE t.schemaname='public'
 ORDER BY 1,2;
 ```
 
+### Top 10 indexes by size
+```sql
+SELECT
+       c.relname AS table_name,
+       ipg.relname AS index_name,
+       pg_size_pretty(pg_relation_size(quote_ident(indexrelname)::text)) AS index_size
+FROM pg_index x
+JOIN pg_class c ON c.oid = x.indrelid
+JOIN pg_class ipg ON ipg.oid = x.indexrelid
+JOIN pg_stat_all_indexes psai ON x.indexrelid = psai.indexrelid AND psai.schemaname = 'public'
+ORDER BY pg_relation_size(quote_ident(indexrelname)::text) desc nulls last
+LIMIT 10;
+```
+
 ## Unused indexes
 ```sql
 select
