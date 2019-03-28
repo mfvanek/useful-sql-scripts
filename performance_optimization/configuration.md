@@ -23,6 +23,8 @@ show max_wal_size;
 show work_mem;
 ```
 
+[См. также](https://www.depesz.com/2011/07/03/understanding-postgresql-conf-work_mem/)
+
 ### maintenance_work_mem
 Задаёт максимальный объём памяти для операций обслуживания БД, в частности VACUUM, CREATE INDEX и ALTER TABLE ADD FOREIGN KEY.  
 По умолчанию его значение — 64 мегабайта (64MB).
