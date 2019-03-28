@@ -46,3 +46,19 @@ set maintenance_work_mem='2 GB';
 ```sql
 show temp_file_limit;
 ```
+
+#### Мои рекомендации
+Значение **temp_file_limit** имеет смысл устанавливать исходя из максимального размера индексов в БД с некоторым запасом.  
+Получить топ-10 индексов по размеру можно с помощью запроса:
+```sql
+SELECT
+  c.relname AS table_name,
+  ipg.relname AS index_name,
+  pg_size_pretty(pg_relation_size(quote_ident(indexrelname)::text)) AS index_size
+FROM pg_index x
+       JOIN pg_class c ON c.oid = x.indrelid
+       JOIN pg_class ipg ON ipg.oid = x.indexrelid
+       JOIN pg_stat_all_indexes psai ON x.indexrelid = psai.indexrelid AND psai.schemaname = 'public'
+ORDER BY pg_relation_size(quote_ident(indexrelname)::text) desc nulls last
+LIMIT 10;
+```
