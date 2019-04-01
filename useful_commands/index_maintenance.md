@@ -100,8 +100,7 @@ order by
 
 ## Invalid indexes
 Когда индекс создаётся конкурентно, то он может быть физически создан, но оставаться невалидным.  
-Причин этому может быть несколько, например, нехватка памяти из-за некорректных значений параметров **maintenance_work_mem** и **temp_file_limit**.  
-Подробности [здесь](https://github.com/mfvanek/useful-sql-scripts/blob/master/performance_optimization/configuration.md#maintenance_work_mem).  
+Причин этому может быть несколько, например, нехватка памяти из-за некорректных значений параметров **maintenance_work_mem** и **temp_file_limit**. Подробности [здесь](https://github.com/mfvanek/useful-sql-scripts/blob/master/performance_optimization/configuration.md#maintenance_work_mem).  
 Найти все навалидные индексы можно с помощью запроса:
 ```sql
 select t.tablename, i.indexname
