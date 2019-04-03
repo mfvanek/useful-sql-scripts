@@ -56,10 +56,11 @@ SELECT
 FROM pg_tables t
 LEFT OUTER JOIN pg_class c ON t.tablename=c.relname
 LEFT OUTER JOIN
-    ( SELECT c.relname AS ctablename, ipg.relname AS indexname, x.indnatts AS number_of_columns, idx_scan, idx_tup_read, idx_tup_fetch, indexrelname, indisunique FROM pg_index x
-           JOIN pg_class c ON c.oid = x.indrelid
-           JOIN pg_class ipg ON ipg.oid = x.indexrelid
-           JOIN pg_stat_all_indexes psai ON x.indexrelid = psai.indexrelid AND psai.schemaname = 'public' )
+    ( SELECT c.relname AS ctablename, ipg.relname AS indexname, x.indnatts AS number_of_columns, idx_scan, idx_tup_read, idx_tup_fetch, indexrelname, indisunique
+        FROM pg_index x
+        JOIN pg_class c ON c.oid = x.indrelid
+        JOIN pg_class ipg ON ipg.oid = x.indexrelid
+        JOIN pg_stat_all_indexes psai ON x.indexrelid = psai.indexrelid AND psai.schemaname = 'public' )
     AS foo
     ON t.tablename = foo.ctablename
 WHERE t.schemaname='public'
@@ -100,8 +101,8 @@ order by
 
 ## Invalid indexes
 Когда индекс создаётся конкурентно, то он может быть физически создан, но оставаться невалидным.  
-Причин этому может быть несколько, например, нехватка памяти из-за некоректных значений параметров **maintenance_work_mem** и **temp_file_limit**. Подробности [здесь](https://github.com/mfvanek/useful-sql-scripts/blob/master/performance_optimization/configuration.md#maintenance_work_mem).  
-Найти все навалидные индексы можно с помощью запроса:  
+Причин этому может быть несколько, например, нехватка памяти из-за некорректных значений параметров **maintenance_work_mem** и **temp_file_limit**. Подробности [здесь](https://github.com/mfvanek/useful-sql-scripts/blob/master/performance_optimization/configuration.md#maintenance_work_mem).  
+Найти все навалидные индексы можно с помощью запроса:
 ```sql
 select t.tablename, i.indexname
 from pg_tables t
