@@ -32,6 +32,7 @@ show work_mem;
 show maintenance_work_mem;
 show autovacuum_work_mem;
 show autovacuum_max_workers;
+-- set maintenance_work_mem = '256MB';
 ```
 
 #### Рекомендации Amazon
