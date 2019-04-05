@@ -65,3 +65,23 @@ FROM pg_index x
 ORDER BY pg_relation_size(quote_ident(indexrelname)::text) desc nulls last
 LIMIT 10;
 ```
+
+## Логирование и поиск долгих запросов
+### log_min_duration_statement
+#### Документация
+- [На русском](https://postgrespro.ru/docs/postgrespro/10/runtime-config-logging)
+- [На английском](https://www.postgresql.org/docs/10/runtime-config-logging.html)
+
+#### Команды
+```sql
+show log_min_duration_statement;
+show log_destination;
+show logging_collector;
+show log_directory;
+show log_filename;
+show log_file_mode;
+show log_rotation_age;
+show log_rotation_size;
+show log_statement;
+show log_temp_files;
+```
