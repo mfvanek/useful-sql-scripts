@@ -7,7 +7,7 @@
 - [На английском](https://www.postgresql.org/docs/10/runtime-config-resource.html)
 
 ### shared_buffers
-Если вы используете выделенный сервер с объёмом ОЗУ 1 ГБ и более, разумным начальным значением **shared_buffers** будет 25% от объёма памяти.  
+Если вы используете выделенный сервер с объёмом ОЗУ 1 ГБ и более, разумным начальным значением **shared_buffers** будет 25% от объёма памяти. Обычно не поднимают этот параметр выше 8 ГБайт.  
 При увеличении **shared_buffers** обычно требуется соответственно увеличить **max_wal_size**, чтобы растянуть процесс записи большого объёма новых или изменённых данных на более продолжительное время.
 ```sql
 show shared_buffers;
@@ -86,4 +86,11 @@ show log_rotation_age;
 show log_rotation_size;
 show log_statement;
 show log_temp_files;
+```
+
+### pg_stat_statements
+- [Документация](https://postgrespro.ru/docs/postgrespro/10/pgstatstatements)
+For example:
+```sql
+select * from pg_stat_statements where calls > 10 order by mean_time desc limit 20;
 ```
