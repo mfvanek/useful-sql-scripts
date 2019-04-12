@@ -20,6 +20,11 @@ SELECT pg_size_pretty(pg_database_size(current_database()));
 ```
 В результате получим информацию вида **40 Mb**.
 
+#### Для всех баз данных
+```sql
+SELECT pg_database.datname, pg_size_pretty(pg_database_size(pg_database.datname)) AS size FROM pg_database;
+```
+
 ### Перечень таблиц
 Иногда требуется получить перечень таблиц базы данных. Для этого используем следующий запрос:
 ```sql
