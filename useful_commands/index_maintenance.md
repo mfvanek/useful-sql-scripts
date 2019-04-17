@@ -108,11 +108,10 @@ order by
 Причин этому может быть несколько, например, нехватка памяти из-за некорректных значений параметров **maintenance_work_mem** и **temp_file_limit**. Подробности [здесь](https://github.com/mfvanek/useful-sql-scripts/blob/master/performance_optimization/configuration.md#maintenance_work_mem).  
 Найти все навалидные индексы можно с помощью запроса:
 ```sql
-select c.relname as table_name, x.indexrelid::regclass as index_name
+select x.indrelid::regclass as table_name, x.indexrelid::regclass as index_name
 from pg_index x
-join pg_class c on c.oid = x.indrelid
 join pg_stat_all_indexes psai on x.indexrelid = psai.indexrelid and psai.schemaname = 'public'::text
-where x.indisvalid = false
+where x.indisvalid = false;
 ```
 
 ### How to fix invalid indexes
@@ -126,15 +125,17 @@ reindex index i_item_shipment_id;
 ### For totally identical
 Типовая ошибка, когда создаётся столбец с UNIQUE CONSTRAINTS, а затем на него вручную создаётся уникальный индекс. См. [документацию](https://www.postgresql.org/docs/10/ddl-constraints.html#DDL-CONSTRAINTS-UNIQUE-CONSTRAINTS).
 ```sql
-SELECT pg_size_pretty(SUM(pg_relation_size(idx))::BIGINT) AS SIZE,
-       (array_agg(idx))[1] AS idx1, (array_agg(idx))[2] AS idx2,
-       (array_agg(idx))[3] AS idx3, (array_agg(idx))[4] AS idx4
-FROM (
-       SELECT indexrelid::regclass AS idx, (indrelid::text ||E'\n'|| indclass::text ||E'\n'|| indkey::text ||E'\n'||
-                                            COALESCE(indexprs::text,'')||E'\n' || COALESCE(indpred::text,'')) AS KEY
-       FROM pg_index) sub
-GROUP BY KEY HAVING COUNT(*)>1
-ORDER BY SUM(pg_relation_size(idx)) DESC;
+select table_name, pg_size_pretty(sum(pg_relation_size(idx))::bigint) as total_size,
+       (array_agg(idx))[1] as idx1, (array_agg(idx))[2] as idx2,
+       (array_agg(idx))[3] as idx3, (array_agg(idx))[4] as idx4
+from (
+       select x.indexrelid::regclass as idx, x.indrelid::regclass as table_name,
+              (x.indrelid::text ||' '|| x.indclass::text ||' '|| x.indkey::text ||' '|| coalesce(pg_get_expr(x.indexprs, x.indrelid),'')||e' ' || coalesce(pg_get_expr(x.indpred, x.indrelid),'')) as key
+       from pg_index x
+              join pg_stat_all_indexes psai on x.indexrelid = psai.indexrelid and psai.schemaname = 'public'::text
+     ) sub
+group by table_name, key having count(*)>1
+order by sum(pg_relation_size(idx)) desc;
 ```
 ### For intersecting indexes
 ```sql
