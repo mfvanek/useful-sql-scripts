@@ -108,17 +108,11 @@ order by
 Причин этому может быть несколько, например, нехватка памяти из-за некорректных значений параметров **maintenance_work_mem** и **temp_file_limit**. Подробности [здесь](https://github.com/mfvanek/useful-sql-scripts/blob/master/performance_optimization/configuration.md#maintenance_work_mem).  
 Найти все навалидные индексы можно с помощью запроса:
 ```sql
-select t.tablename, i.indexname
-from pg_tables t
-join pg_class c on t.tablename = c.relname
-join (
-  select c.relname AS ctablename, ipg.relname AS indexname
-  from pg_index x
-  join pg_class c ON c.oid = x.indrelid
-  join pg_class ipg ON ipg.oid = x.indexrelid
-  join pg_stat_all_indexes psai ON x.indexrelid = psai.indexrelid AND psai.schemaname = 'public'
-  where x.indisvalid = false
-) as i on t.tablename = i.ctablename;
+select c.relname as table_name, x.indexrelid::regclass as index_name
+from pg_index x
+join pg_class c on c.oid = x.indrelid
+join pg_stat_all_indexes psai on x.indexrelid = psai.indexrelid and psai.schemaname = 'public'::text
+where x.indisvalid = false
 ```
 
 ### How to fix invalid indexes
