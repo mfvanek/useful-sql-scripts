@@ -122,10 +122,11 @@ reindex index i_item_shipment_id;
 ```
 
 ## Duplicate indexes
+
 ### For totally identical
 Типовая ошибка, когда создаётся столбец с UNIQUE CONSTRAINTS, а затем на него вручную создаётся уникальный индекс. См. [документацию](https://www.postgresql.org/docs/10/ddl-constraints.html#DDL-CONSTRAINTS-UNIQUE-CONSTRAINTS).
 ```sql
-select table_name, pg_size_pretty(sum(pg_relation_size(idx))::bigint) as total_size,
+select table_name, pg_size_pretty(sum(pg_relation_size(idx))::bigint) as total_size, string_agg(idx::text, '; ') as index_names,
        (array_agg(idx))[1] as idx1, (array_agg(idx))[2] as idx2,
        (array_agg(idx))[3] as idx3, (array_agg(idx))[4] as idx4
 from (
@@ -137,9 +138,11 @@ from (
 group by table_name, key having count(*)>1
 order by sum(pg_relation_size(idx)) desc;
 ```
+
 ### For intersecting indexes
 ```sql
-select a.indrelid::regclass as table_name, a.indexrelid::regclass as first_index, b.indexrelid::regclass as second_index
+select a.indrelid::regclass as table_name, a.indexrelid::regclass as first_index, b.indexrelid::regclass as second_index,
+       pg_relation_size(a.indexrelid) + pg_relation_size(b.indexrelid) as total_size
 from (select *, array_to_string(indkey, ' ') as cols from pg_index) as a
 join (select *, array_to_string(indkey, ' ') as cols from pg_index) as b on
   (a.indrelid = b.indrelid and a.indexrelid > b.indexrelid and
@@ -149,17 +152,4 @@ join (select *, array_to_string(indkey, ' ') as cols from pg_index) as b on
      )
   )
 order by a.indrelid;
-```
-### Version 3
-```sql
-select ui.relname as table_name, ui.indexrelname as index_name, ui.idx_scan as index_scans,
-       pg_size_pretty(pg_relation_size(ui.relid)) as table_size,
-       pg_size_pretty(pg_relation_size(ui.indexrelid)) as index_size,
-       t.n_tup_upd + t.n_tup_ins + t.n_tup_del as writes,
-       i.indexdef as create_command
-from pg_stat_user_indexes ui
-join pg_indexes i on (i.indexname = ui.indexrelname and ui.schemaname = i.schemaname)
-join pg_stat_user_tables t on t.relid = ui.relid
-where ui.idx_scan < 50 and i.indexdef !~* 'unique'
-order by ui.relname, ui.indexrelname;
 ```
