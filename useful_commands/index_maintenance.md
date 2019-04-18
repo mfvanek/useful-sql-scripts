@@ -99,7 +99,7 @@ where
   psui.schemaname = 'public'::text and
   not i.indisunique and
   psui.idx_scan < 50 and
-  pg_relation_size(psui.relid) > 5 * 8192 -- skip small tables
+  pg_relation_size(psui.relid) >= 5 * 8192 -- skip small tables
 order by psui.relname, pg_relation_size(i.indexrelid) desc
 ```
 
