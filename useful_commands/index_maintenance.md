@@ -88,19 +88,19 @@ LIMIT 10;
 По-хорошему, скрипт нужно запускать на всех хостах и брать пересечение полученных результатов.
 ```sql
 select
-       schemaname || '.' || relname as table_name,
-       indexrelname as index_name,
-       pg_size_pretty(pg_relation_size(i.indexrelid)) as index_size,
-       idx_scan as index_scans
-from pg_stat_user_indexes ui
-join pg_index i on ui.indexrelid = i.indexrelid
+    psui.relname as table_name,
+    psui.indexrelname as index_name,
+    pg_relation_size(i.indexrelid) as index_size,
+    pg_size_pretty(pg_relation_size(i.indexrelid)) as index_size_pretty,
+    psui.idx_scan as index_scans
+from pg_stat_user_indexes psui
+join pg_index i on psui.indexrelid = i.indexrelid
 where
-      not indisunique and
-      idx_scan < 50 and
-      pg_relation_size(relid) > 5 * 8192
-order by
-         pg_relation_size(i.indexrelid) / nullif(idx_scan, 0) desc nulls first,
-         pg_relation_size(i.indexrelid) desc
+  psui.schemaname = 'public'::text and
+  not i.indisunique and
+  psui.idx_scan < 50 and
+  pg_relation_size(psui.relid) > 5 * 8192 -- skip small tables
+order by psui.relname, pg_relation_size(i.indexrelid) desc
 ```
 
 ## Invalid indexes
