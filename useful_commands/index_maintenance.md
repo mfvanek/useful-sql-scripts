@@ -169,3 +169,17 @@ from pg_index
 where pg_statistic.stanullfrac>0.5 AND pg_relation_size(pg_index.indexrelid)>10*8192
 order by pg_relation_size(pg_index.indexrelid) desc,1,2,3;
 ```
+
+```
+select x.indrelid::regclass as table_name, x.indexrelid::regclass as index_name,
+coalesce(pg_get_expr(x.indpred, x.indrelid),'') as index_predicate,
+string_agg(a.attname, ', ') as nullable_fields
+from pg_index x
+join pg_stat_all_indexes psai on x.indexrelid = psai.indexrelid and psai.schemaname = 'public'::text
+join pg_attribute a ON a.attrelid = x.indrelid AND a.attnum = any(x.indkey)
+where not x.indisunique
+and not a.attnotnull
+and (x.indpred is null or (position(lower(a.attname) in lower(pg_get_expr(x.indpred, x.indrelid))) = 0))
+group by x.indrelid, x.indexrelid, x.indpred
+order by 1,2
+```
