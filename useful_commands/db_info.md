@@ -73,3 +73,9 @@ SELECT datname,usename,client_addr,client_port FROM pg_stat_activity;
 ```sql
 SELECT datname FROM pg_stat_activity WHERE usename = 'devuser';
 ```
+
+### Connection limit per user
+```sql
+select rolname, rolconnlimit from pg_roles where rolconnlimit <> -1;
+```
+See [pg_roles](https://postgrespro.ru/docs/postgrespro/10/view-pg-roles)
