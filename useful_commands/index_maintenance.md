@@ -186,3 +186,29 @@ where not x.indisunique
 group by x.indrelid, x.indexrelid, x.indpred
 order by 1,2
 ```
+
+## Indexes on foreign keys
+```sql
+SELECT conname, conrelid::regclass, --conindid::regclass,
+       conkey,
+       pg_get_constraintdef(r.oid, true) as condef
+FROM pg_constraint r
+WHERE r.contype = 'f' ORDER BY 1
+```
+
+```
+SELECT conrelid::regclass
+     ,conname
+     ,reltuples::bigint
+FROM pg_constraint
+            JOIN pg_class ON (conrelid = pg_class.oid)
+WHERE contype = 'f'
+  AND NOT EXISTS (
+    SELECT 1
+    FROM pg_index
+    WHERE indrelid = conrelid
+      AND (conkey::int[] <@ indkey::int[]) and (conkey::int[] @> indkey::int[])
+      --AND (conkey::int[] <@ indkey::int[])
+       )
+ORDER BY reltuples DESC
+```
