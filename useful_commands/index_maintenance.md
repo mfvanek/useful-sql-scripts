@@ -188,27 +188,53 @@ order by 1,2
 ```
 
 ## Indexes on foreign keys
+### All foreign keys
 ```sql
-SELECT conname, conrelid::regclass, --conindid::regclass,
-       conkey,
-       pg_get_constraintdef(r.oid, true) as condef
-FROM pg_constraint r
-WHERE r.contype = 'f' ORDER BY 1
+select t.relname as table_name, array_agg(col.attname order by u.attposition) as columns,
+       c.conname as constraint_name, pg_get_constraintdef(c.oid) as definition,
+       i.indexrelid::regclass covered_index_name
+from pg_constraint c
+       join lateral unnest(c.conkey) with ordinality as u(attnum, attposition) on true
+       join pg_class t on t.oid = c.conrelid
+       join pg_namespace sch on sch.oid = t.relnamespace
+       join pg_attribute col on (col.attrelid = t.oid and col.attnum = u.attnum)
+       left join pg_index i on i.indrelid = c.conrelid and (c.conkey::int[] <@ i.indkey::int[]) and (c.conkey::int[] @> i.indkey::int[])
+where c.contype = 'f' and sch.nspname = 'public'
+group by constraint_name, table_name, definition, covered_index_name
+order by table_name;
 ```
 
+### Requires separate index for each foreign key
+```sql
+select c.conrelid::regclass as table_name, array_agg(col.attname order by u.attposition) as columns,
+       c.conname as constraint_name, pg_get_constraintdef(c.oid) as definition
+from pg_constraint c
+  join lateral unnest(c.conkey) with ordinality as u(attnum, attposition) on true
+  join pg_class t on (c.conrelid = t.oid)
+  join pg_attribute col on (col.attrelid = t.oid and col.attnum = u.attnum)
+where contype = 'f'
+  and not exists (
+    select 1
+    from pg_index
+    where indrelid = c.conrelid
+    and (c.conkey::int[] <@ indkey::int[]) and (c.conkey::int[] @> indkey::int[])
+  )
+group by c.conrelid, c.conname, c.oid
+order by table_name;
 ```
-SELECT conrelid::regclass
-     ,conname
-     ,reltuples::bigint
-FROM pg_constraint
-            JOIN pg_class ON (conrelid = pg_class.oid)
-WHERE contype = 'f'
-  AND NOT EXISTS (
-    SELECT 1
-    FROM pg_index
-    WHERE indrelid = conrelid
-      AND (conkey::int[] <@ indkey::int[]) and (conkey::int[] @> indkey::int[])
-      --AND (conkey::int[] <@ indkey::int[])
-       )
-ORDER BY reltuples DESC
+
+### Uses already existing composite indexes (the best option)
+```sql
+select c.conrelid::regclass as table_name, array_agg(col.attname order by u.attposition) as columns,
+       c.conname as constraint_name, pg_get_constraintdef(c.oid) as definition
+from pg_constraint c
+  join lateral unnest(c.conkey) with ordinality as u(attnum, attposition) on true
+  join pg_class t on (c.conrelid = t.oid)
+  join pg_attribute col on (col.attrelid = t.oid and col.attnum = u.attnum)
+where contype = 'f'
+  and not exists (
+    select 1 from pg_index where indrelid = c.conrelid and (c.conkey::int[] <@ indkey::int[])
+  )
+group by c.conrelid, c.conname, c.oid
+order by table_name;
 ```
