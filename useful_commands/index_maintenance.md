@@ -198,7 +198,7 @@ order by 1,2
 ## Indexes on foreign keys
 ### All foreign keys
 ```sql
-select t.relname as table_name, array_agg(col.attname order by u.attposition) as columns,
+select t.relname as table_name, string_agg(col.attname, ', ' order by u.attposition) as columns,
        c.conname as constraint_name, pg_get_constraintdef(c.oid) as definition,
        i.indexrelid::regclass covered_index_name
 from pg_constraint c
@@ -214,7 +214,7 @@ order by table_name;
 
 ### Requires separate index for each foreign key
 ```sql
-select c.conrelid::regclass as table_name, array_agg(col.attname order by u.attposition) as columns,
+select c.conrelid::regclass as table_name, string_agg(col.attname, ', ' order by u.attposition) as columns,
        c.conname as constraint_name, pg_get_constraintdef(c.oid) as definition
 from pg_constraint c
   join lateral unnest(c.conkey) with ordinality as u(attnum, attposition) on true
@@ -233,7 +233,7 @@ order by table_name;
 
 ### Uses already existing composite indexes (the best option)
 ```sql
-select c.conrelid::regclass as table_name, array_agg(col.attname order by u.attposition) as columns,
+select c.conrelid::regclass as table_name, string_agg(col.attname, ', ' order by u.attposition) as columns,
        c.conname as constraint_name, pg_get_constraintdef(c.oid) as definition
 from pg_constraint c
   join lateral unnest(c.conkey) with ordinality as u(attnum, attposition) on true
@@ -244,5 +244,5 @@ where contype = 'f'
     select 1 from pg_index where indrelid = c.conrelid and (c.conkey::int[] <@ indkey::int[])
   )
 group by c.conrelid, c.conname, c.oid
-order by table_name;
+order by (c.conrelid::regclass)::text, columns;
 ```
