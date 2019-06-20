@@ -108,6 +108,7 @@ where
       i.indexrelid not in (select * from forein_key_indexes) and -- retain indexes on foreign keys
       psui.idx_scan < 50 and
       pg_relation_size(psui.relid) >= 5 * 8192 -- skip small tables
+	  and pg_relation_size(psui.indexrelid) >= 5 * 8192 -- skip small indexes
 order by psui.relname, pg_relation_size(i.indexrelid) desc
 ```
 
