@@ -22,3 +22,21 @@ BEGIN
     END LOOP;
 END$$;
 ```
+
+## Зависшие запросы
+```
+select (now() - xact_start)::time as xact_age,
+       (now() - query_start)::time as query_age,
+       (now() - state_change)::time as change_age,
+       pid,
+       'select pg_terminate_backend(' || pid || ');' as kill_statement,
+       state, datname, usename,
+       coalesce(wait_event_type = 'lock', 'f') as waiting,
+       wait_event_type ||'.'|| wait_event as wait_details,
+       client_addr ||'.'|| client_port as client,
+       query
+from pg_stat_activity
+where clock_timestamp() - coalesce(xact_start, query_start) > '00:00:00.1'::interval
+  and pid <> pg_backend_pid() and state <> 'idle'
+order by coalesce(xact_start, query_start);
+```
