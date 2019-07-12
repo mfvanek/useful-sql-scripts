@@ -84,3 +84,18 @@ SELECT datname FROM pg_stat_activity WHERE usename = 'devuser';
 select rolname, rolconnlimit from pg_roles where rolconnlimit <> -1;
 ```
 See [pg_roles](https://postgrespro.ru/docs/postgrespro/10/view-pg-roles)
+
+### Roles hierarchy
+```
+SELECT r.rolname, r.rolsuper, r.rolinherit,
+       r.rolcreaterole, r.rolcreatedb, r.rolcanlogin,
+       r.rolconnlimit, r.rolvaliduntil,
+       ARRAY(SELECT b.rolname
+             FROM pg_catalog.pg_auth_members m
+                    JOIN pg_catalog.pg_roles b ON (m.roleid = b.oid)
+             WHERE m.member = r.oid) as memberof
+    , pg_catalog.shobj_description(r.oid, 'pg_authid') AS description
+    , r.rolreplication
+FROM pg_catalog.pg_roles r
+ORDER BY 1;
+```
