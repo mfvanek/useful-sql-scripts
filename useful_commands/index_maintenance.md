@@ -81,6 +81,22 @@ ORDER BY pg_relation_size(quote_ident(indexrelname)::text) desc nulls last
 LIMIT 10;
 ```
 
+## Missing indexes
+```sql
+select
+       relname as table_name,
+       seq_scan - coalesce(idx_scan, 0) as too_much_seq,
+       pg_relation_size(relname::regclass) as table_size,
+       seq_scan, idx_scan,
+       case when seq_scan - coalesce(idx_scan, 0) > 0 then 'missing index?' else 'ok' end as verdict
+from
+     pg_stat_all_tables
+where
+      schemaname = 'public' and
+      pg_relation_size(relname::regclass) > 10 * 8192 -- skip small tables
+order by too_much_seq desc;
+```
+
 ## Unused indexes
 Нужно быть осторожным в том случае, если вы используете потоковую репликацию.  
 Например, readonly-запросы могут всегда выполняться на синхронной реплике.  
