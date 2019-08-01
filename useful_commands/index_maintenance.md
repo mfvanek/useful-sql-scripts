@@ -83,19 +83,24 @@ LIMIT 10;
 
 ## Missing indexes
 ```sql
-select
-       relname as table_name,
-       seq_scan - coalesce(idx_scan, 0) as too_much_seq,
-       pg_relation_size(relname::regclass) as table_size,
-       seq_scan, idx_scan
-from
-     pg_stat_all_tables
-where
+with tables_without_indexes as (
+  select
+    relname as table_name,
+    coalesce(seq_scan, 0) - coalesce(idx_scan, 0) as too_much_seq,
+    pg_relation_size(relname::regclass) as table_size,
+    coalesce(seq_scan, 0) as seq_scan,
+    coalesce(idx_scan, 0) as idx_scan
+  from pg_stat_all_tables
+  where
       schemaname = 'public' and
-      (coalesce(seq_scan, 0) + coalesce(idx_scan, 0)) > 0 and -- table in use
-      (seq_scan - coalesce(idx_scan, 0)) > 0 and -- too much sequential scans
       pg_relation_size(relname::regclass) > 10 * 8192 and -- skip small tables
-     relname not in ('databasechangelog')
+      relname not in ('databasechangelog')
+)
+select *
+from tables_without_indexes
+where
+    (seq_scan + idx_scan) > 0 and -- table in use
+    too_much_seq > 0 -- too much sequential scans
 order by too_much_seq desc;
 ```
 
