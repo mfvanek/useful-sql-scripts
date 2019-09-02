@@ -57,7 +57,7 @@ SELECT pg_relation_size('accounts');
 ### Имя самой большой таблицы
 Для того, чтобы вывести список таблиц текущей базы данных, отсортированный по размеру таблицы, выполним следующий запрос:
 ```sql
-SELECT relname, relpages FROM pg_class ORDER BY relpages DESC;
+select relname, pg_size_pretty(pg_relation_size(oid)), pg_relation_size(oid) from pg_class order by relpages desc;
 ```
 Для того, чтобы вывести информацию о самой большой таблице, ограничим запрос с помощью `LIMIT`:
 ```sql
