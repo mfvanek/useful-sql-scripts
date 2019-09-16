@@ -13,3 +13,7 @@ postgresql.conf
 
 show random_page_cost;
 [Настройка сервера](https://postgrespro.ru/docs/postgrespro/10/runtime-config-query)
+
+log_min_duration_statement
+idle_in_transaction_session_timeout
+statement_timeout
