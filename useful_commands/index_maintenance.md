@@ -188,21 +188,6 @@ order by a.indrelid;
 
 ## Indexes with nulls
 ```sql
-select
-  pg_index.indrelid::regclass as table,
-  pg_index.indexrelid::regclass as index,
-  pg_attribute.attname as field,
-  pg_statistic.stanullfrac,
-  pg_size_pretty(pg_relation_size(pg_index.indexrelid)) as indexsize,
-  pg_get_indexdef(pg_index.indexrelid) as indexdef
-from pg_index
-       join pg_attribute ON pg_attribute.attrelid=pg_index.indrelid AND pg_attribute.attnum=ANY(pg_index.indkey)
-       join pg_statistic ON pg_statistic.starelid=pg_index.indrelid AND pg_statistic.staattnum=pg_attribute.attnum
-where pg_statistic.stanullfrac>0.5 AND pg_relation_size(pg_index.indexrelid)>10*8192
-order by pg_relation_size(pg_index.indexrelid) desc,1,2,3;
-```
-
-```
 select x.indrelid::regclass as table_name, x.indexrelid::regclass as index_name,
        coalesce(pg_get_expr(x.indpred, x.indrelid),'') as index_predicate,
        string_agg(a.attname, ', ') as nullable_fields,
@@ -216,7 +201,7 @@ where not x.indisunique
   and (x.indpred is null or (position(lower(a.attname) in lower(pg_get_expr(x.indpred, x.indrelid))) = 0))
   and pg_relation_size(x.indexrelid) > 10 * 8192 -- skip small indexes
 group by x.indrelid, x.indexrelid, x.indpred
-order by 1,2
+order by 1,2;
 ```
 
 ## Indexes on foreign keys
