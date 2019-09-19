@@ -54,6 +54,10 @@ SELECT pg_relation_size('accounts');
 ```
 Функция [pg_relation_size()](https://postgrespro.ru/docs/postgrespro/9.5/functions-admin) возвращает объём, который занимает на диске указанный слой заданной таблицы или индекса.
 
+```sql
+select pg_size_pretty(pg_total_relation_size('public.order_item'));
+```
+
 ### Имя самой большой таблицы
 Для того, чтобы вывести список таблиц текущей базы данных, отсортированный по размеру таблицы, выполним следующий запрос:
 ```sql
@@ -98,4 +102,14 @@ SELECT r.rolname, r.rolsuper, r.rolinherit,
     , r.rolreplication
 FROM pg_catalog.pg_roles r
 ORDER BY 1;
+```
+
+### Amount of dead and live tuples
+```sql
+select relname as objectname, pg_stat_get_live_tuples(c.oid) as livetuples, pg_stat_get_dead_tuples(c.oid) as deadtuples
+from pg_class c where relname = 'order_item';
+```
+
+```sql
+select * from pg_stat_all_tables where relname='order_item';
 ```
