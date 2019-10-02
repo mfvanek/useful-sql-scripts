@@ -61,7 +61,17 @@ select pg_size_pretty(pg_total_relation_size('public.order_item'));
 ### Имя самой большой таблицы
 Для того, чтобы вывести список таблиц текущей базы данных, отсортированный по размеру таблицы, выполним следующий запрос:
 ```sql
-select relname, pg_size_pretty(pg_relation_size(oid)), pg_relation_size(oid) from pg_class order by relpages desc;
+select
+    coalesce(t.spcname, 'pg_default') as tablespace,
+    n.nspname ||'.'||c.relname as table,
+    (select count(*) from pg_index i where i.indrelid=c.oid) as index_count,
+    pg_size_pretty(pg_relation_size(c.oid)) as t_size,
+    pg_size_pretty(pg_indexes_size(c.oid)) as i_size
+from pg_class c
+         join pg_namespace n on c.relnamespace = n.oid
+         left join pg_tablespace t on c.reltablespace = t.oid
+where c.reltype != 0 and n.nspname = 'public'
+order by (pg_relation_size(c.oid),pg_indexes_size(c.oid)) desc;
 ```
 Для того, чтобы вывести информацию о самой большой таблице, ограничим запрос с помощью `LIMIT`:
 ```sql
