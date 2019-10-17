@@ -81,6 +81,33 @@ ORDER BY pg_relation_size(quote_ident(indexrelname)::text) desc nulls last
 LIMIT 10;
 ```
 
+## Tables without primary keys
+```sql
+select tablename
+from pg_tables
+where
+      schemaname = 'public' and
+      tablename not in (
+          select c.conrelid::regclass::text as table_name
+          from pg_constraint c
+          where contype = 'p') and
+      tablename not in ('databasechangelog')
+order by tablename;
+```
+
+### Detailed information about primary keys
+```sql
+select c.conrelid::regclass as table_name, string_agg(col.attname, ', ' order by u.attposition) as columns,
+       c.conname as constraint_name, pg_get_constraintdef(c.oid) as definition
+from pg_constraint c
+         join lateral unnest(c.conkey) with ordinality as u(attnum, attposition) on true
+         join pg_class t on (c.conrelid = t.oid)
+         join pg_attribute col on (col.attrelid = t.oid and col.attnum = u.attnum)
+where contype = 'p'
+group by c.conrelid, c.conname, c.oid
+order by (c.conrelid::regclass)::text, columns;
+```
+
 ## Missing indexes
 ```sql
 with tables_without_indexes as (
