@@ -231,6 +231,25 @@ group by x.indrelid, x.indexrelid, x.indpred
 order by 1,2;
 ```
 
+Расширенная версия запроса, которая игнорирует многоколоночные индексы, у которых первый столбец не null
+```sql
+select x.indrelid::regclass as table_name, x.indexrelid::regclass as index_name,
+       coalesce(pg_get_expr(x.indpred, x.indrelid),'') as index_predicate,
+       string_agg(a.attname, ', ') as nullable_fields,
+       pg_relation_size(x.indexrelid) as index_size,
+       pg_size_pretty(pg_relation_size(x.indexrelid)) as index_size_pretty
+from pg_index x
+         join pg_stat_all_indexes psai on x.indexrelid = psai.indexrelid and psai.schemaname = 'public'::text
+         join pg_attribute a ON a.attrelid = x.indrelid AND a.attnum = any(x.indkey)
+where not x.indisunique
+  and not a.attnotnull
+  and array_position(x.indkey, a.attnum) = 0 -- only for first segment
+  and (x.indpred is null or (position(lower(a.attname) in lower(pg_get_expr(x.indpred, x.indrelid))) = 0))
+  and pg_relation_size(x.indexrelid) > 10 * 8192 -- skip small indexes
+group by x.indrelid, x.indexrelid, x.indpred
+order by 1,2
+```
+
 ## Indexes on foreign keys
 ### All foreign keys
 ```sql
