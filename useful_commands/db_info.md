@@ -123,3 +123,13 @@ from pg_class c where relname = 'order_item';
 ```sql
 select * from pg_stat_all_tables where relname='order_item';
 ```
+
+### Columns info
+```sql
+select table_name,
+       c.column_name, c.data_type, coalesce(c.numeric_precision, c.character_maximum_length) as maximum_length, c.numeric_scale
+from pg_catalog.pg_statio_all_tables as st
+         inner join pg_catalog.pg_description pgd on (pgd.objoid=st.relid)
+         right outer join information_schema.columns c on (pgd.objsubid=c.ordinal_position and  c.table_schema=st.schemaname and c.table_name=st.relname)
+where table_schema = 'public';
+```
