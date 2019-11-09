@@ -267,37 +267,23 @@ group by constraint_name, table_name, definition, covered_index_name
 order by table_name;
 ```
 
-### Requires separate index for each foreign key
+### Foreign keys that are not covered with index
 ```sql
-select c.conrelid::regclass as table_name, string_agg(col.attname, ', ' order by u.attposition) as columns,
-       c.conname as constraint_name, pg_get_constraintdef(c.oid) as definition
-from pg_constraint c
-  join lateral unnest(c.conkey) with ordinality as u(attnum, attposition) on true
-  join pg_class t on (c.conrelid = t.oid)
-  join pg_attribute col on (col.attrelid = t.oid and col.attnum = u.attnum)
-where contype = 'f'
-  and not exists (
-    select 1
-    from pg_index
-    where indrelid = c.conrelid
-    and (c.conkey::int[] <@ indkey::int[]) and (c.conkey::int[] @> indkey::int[])
-  )
-group by c.conrelid, c.conname, c.oid
-order by table_name;
-```
 
-### Uses already existing composite indexes (the best option)
-```sql
 select c.conrelid::regclass as table_name, string_agg(col.attname, ', ' order by u.attposition) as columns,
        c.conname as constraint_name, pg_get_constraintdef(c.oid) as definition
 from pg_constraint c
-  join lateral unnest(c.conkey) with ordinality as u(attnum, attposition) on true
-  join pg_class t on (c.conrelid = t.oid)
-  join pg_attribute col on (col.attrelid = t.oid and col.attnum = u.attnum)
+         join lateral unnest(c.conkey) with ordinality as u(attnum, attposition) on true
+         join pg_class t on (c.conrelid = t.oid)
+         join pg_attribute col on (col.attrelid = t.oid and col.attnum = u.attnum)
 where contype = 'f'
   and not exists (
-    select 1 from pg_index where indrelid = c.conrelid and (c.conkey::int[] <@ indkey::int[])
-  )
+        select 1 from pg_index
+        where indrelid = c.conrelid and
+              (c.conkey::int[] <@ indkey::int[]) and -- все поля внешнего ключа должны быть в индексе
+              array_position(indkey::int[], (c.conkey::int[])[1]) = 0 -- порядок полей во внешнем ключе и в индексе совпадает
+      -- здесь бы нужно проверить порядок следования всех полей, но нам это не нужно, так как у нас нет составных FK
+    )
 group by c.conrelid, c.conname, c.oid
 order by (c.conrelid::regclass)::text, columns;
 ```
