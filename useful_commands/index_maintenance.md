@@ -174,28 +174,31 @@ where x.indisvalid = false;
 ```
 
 ### How to fix invalid indexes
-1. Drop index and recreate it
-2. [Reindex](https://postgrespro.ru/docs/postgresql/9.6/sql-reindex)
+1. Drop index and re-create it
+2. [Reindex](https://postgrespro.ru/docs/postgresql/10/sql-reindex)
 ```sql
 reindex index i_item_shipment_id;
 ```
+3. [Reindex concurrently](https://postgrespro.ru/docs/postgresql/12/sql-reindex) (from PostgreSQL 12)
 
 ## Duplicate indexes
 
 ### For totally identical
 Типовая ошибка, когда создаётся столбец с UNIQUE CONSTRAINTS, а затем на него вручную создаётся уникальный индекс. См. [документацию](https://www.postgresql.org/docs/10/ddl-constraints.html#DDL-CONSTRAINTS-UNIQUE-CONSTRAINTS).
 ```sql
-select table_name, pg_size_pretty(sum(pg_relation_size(idx))::bigint) as total_size, string_agg(idx::text, '; ') as index_names,
-       (array_agg(idx))[1] as idx1, (array_agg(idx))[2] as idx2,
-       (array_agg(idx))[3] as idx3, (array_agg(idx))[4] as idx4
+select table_name,
+       string_agg('idx=' || idx::text || ', size=' || pg_relation_size(idx), '; ') as indexes
 from (
        select x.indexrelid::regclass as idx, x.indrelid::regclass as table_name,
-              (x.indrelid::text ||' '|| x.indclass::text ||' '|| x.indkey::text ||' '|| coalesce(pg_get_expr(x.indexprs, x.indrelid),'')||e' ' || coalesce(pg_get_expr(x.indpred, x.indrelid),'')) as key
+              (x.indrelid::text ||' '|| x.indclass::text ||' '|| x.indkey::text ||' '||
+               coalesce(pg_get_expr(x.indexprs, x.indrelid),'')||e' ' ||
+               coalesce(pg_get_expr(x.indpred, x.indrelid),'')) as key
        from pg_index x
-              join pg_stat_all_indexes psai on x.indexrelid = psai.indexrelid and psai.schemaname = 'public'::text
+       join pg_stat_all_indexes psai on x.indexrelid = psai.indexrelid
+       where psai.schemaname = 'public'::text
      ) sub
-group by table_name, key having count(*)>1
-order by sum(pg_relation_size(idx)) desc;
+group by table_name, key having count(*) > 1
+order by table_name, sum(pg_relation_size(idx)) desc;
 ```
 
 ### For intersecting indexes
