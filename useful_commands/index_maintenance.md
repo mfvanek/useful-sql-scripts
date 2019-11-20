@@ -83,15 +83,15 @@ LIMIT 10;
 
 ## Tables without primary keys
 ```sql
-select tablename
+select tablename as table_name
 from pg_tables
 where
-      schemaname = 'public' and
-      tablename not in (
-          select c.conrelid::regclass::text as table_name
-          from pg_constraint c
-          where contype = 'p') and
-      tablename not in ('databasechangelog')
+    schemaname = 'public'::text and
+    tablename not in (
+    select c.conrelid::regclass::text as table_name
+    from pg_constraint c
+    where contype = 'p') and
+    tablename not in ('databasechangelog')
 order by tablename;
 ```
 
