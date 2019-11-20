@@ -111,24 +111,25 @@ order by (c.conrelid::regclass)::text, columns;
 ## Missing indexes
 ```sql
 with tables_without_indexes as (
-  select
-    relname as table_name,
-    coalesce(seq_scan, 0) - coalesce(idx_scan, 0) as too_much_seq,
-    pg_relation_size(relname::regclass) as table_size,
-    coalesce(seq_scan, 0) as seq_scan,
-    coalesce(idx_scan, 0) as idx_scan
-  from pg_stat_all_tables
-  where
-      schemaname = 'public' and
-      pg_relation_size(relname::regclass) > 10 * 8192 and -- skip small tables
-      relname not in ('databasechangelog')
+    select
+        relname::text as table_name,
+        coalesce(seq_scan, 0) - coalesce(idx_scan, 0) as too_much_seq,
+        pg_relation_size(relname::regclass) as table_size,
+        coalesce(seq_scan, 0) as seq_scan,
+        coalesce(idx_scan, 0) as idx_scan
+    from pg_stat_all_tables
+    where
+          schemaname = 'public'::text and
+          pg_relation_size(relname::regclass) > 5::integer * 8192 and /*skip small tables*/
+          relname not in ('databasechangelog')
 )
-select *
+select table_name,
+       seq_scan,
+       idx_scan
 from tables_without_indexes
-where
-    (seq_scan + idx_scan) > 0 and -- table in use
-    too_much_seq > 0 -- too much sequential scans
-order by too_much_seq desc;
+where (seq_scan + idx_scan) > 100::integer and -- table in use
+      too_much_seq > 0 -- too much sequential scans
+order by table_name, too_much_seq desc;
 ```
 
 ## Unused indexes
