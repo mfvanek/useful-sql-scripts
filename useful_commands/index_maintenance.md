@@ -182,7 +182,7 @@ reindex index i_item_shipment_id;
 ## Duplicate indexes
 
 ### For totally identical
-Типовая ошибка, когда создаётся столбец с UNIQUE CONSTRAINTS, а затем на него вручную создаётся уникальный индекс. См. [документацию](https://www.postgresql.org/docs/10/ddl-constraints.html#DDL-CONSTRAINTS-UNIQUE-CONSTRAINTS).
+A typical error is when you create a column with an UNIQUE CONSTRAINT and then manually create an unique index on it. See [documentation](https://www.postgresql.org/docs/10/ddl-constraints.html#DDL-CONSTRAINTS-UNIQUE-CONSTRAINTS).
 ```sql
 select table_name,
        string_agg('idx=' || idx::text || ', size=' || pg_relation_size(idx), '; ') as indexes
