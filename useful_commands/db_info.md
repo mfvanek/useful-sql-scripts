@@ -48,9 +48,25 @@ AND table_schema IN('public', 'myschema');
 В последнем условии `IN` можно указать имя определенной схемы.
 
 ### Размер таблицы
-По аналогии с получением размера базы данных размер данных таблицы можно вычислить с помощью соответствующей функции:
 ```sql
-SELECT pg_relation_size('accounts');
+select table_name,
+       pg_size_pretty(total_size) as total_size,
+       pg_size_pretty(table_size) as table_size,
+       pg_size_pretty(indexes_size) as indexes_size,
+       pg_size_pretty(toast_size) as toast_size
+from (
+    select c.oid::regclass as table_name,
+        pg_total_relation_size(c.oid) as total_size,
+        pg_table_size(c.oid) as table_size,
+        pg_indexes_size(c.oid) as indexes_size,
+        coalesce(pg_total_relation_size(c.reltoastrelid), 0) as toast_size
+    from pg_class c
+             left join pg_namespace n on n.oid = c.relnamespace
+    where c.relkind = 'r'
+      and n.nspname = 'public'::text
+    order by c.relname::text
+) as tables;
+
 ```
 Функция [pg_relation_size()](https://postgrespro.ru/docs/postgrespro/9.5/functions-admin) возвращает объём, который занимает на диске указанный слой заданной таблицы или индекса.
 
