@@ -5,6 +5,19 @@
 select * from pg_stat_replication;
 ```
 
+### Определить состояние хоста
+```sql
+SELECT
+    NOT pg_is_in_recovery(),
+    (
+        CASE WHEN pg_is_in_recovery()
+        THEN COALESCE((EXTRACT(EPOCH FROM now() - pg_last_xact_replay_timestamp()) * 1000)::INTEGER, 0)
+        ELSE 0 END
+    )
+```
+```pg_is_in_recovery()``` - возвращает false на мастере и true - на репликах.
+```now() - pg_last_xact_replay_timestamp()``` - возвращает разницу между текущим временем и меткой последней проигранной транзакции.
+
 ### Размер базы данных
 
 Чтобы получить физический размер файлов (хранилища) базы данных, используем следующий запрос:
