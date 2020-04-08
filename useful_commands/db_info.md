@@ -18,6 +18,13 @@ SELECT
 ```pg_is_in_recovery()``` - возвращает false на мастере и true - на репликах.
 ```now() - pg_last_xact_replay_timestamp()``` - возвращает разницу между текущим временем и меткой последней проигранной транзакции.
 
+### Отставание реплики
+```sql
+select pg_wal_lsn_diff(pg_current_wal_lsn(),restart_lsn) as lag_in_bytes, slot_name, slot_type
+from pg_replication_slots
+where active;
+```
+
 ### Размер базы данных
 
 Чтобы получить физический размер файлов (хранилища) базы данных, используем следующий запрос:
