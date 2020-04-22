@@ -5,6 +5,7 @@
 ## Документация
 - [На русском](https://postgrespro.ru/docs/postgrespro/10/runtime-config-resource)
 - [На английском](https://www.postgresql.org/docs/10/runtime-config-resource.html)
+- [Блог Percona](https://www.percona.com/blog/2018/08/31/tuning-postgresql-database-parameters-to-optimize-performance/)
 
 ### shared_buffers
 Если вы используете выделенный сервер с объёмом ОЗУ 1 ГБ и более, разумным начальным значением **shared_buffers** будет 25% от объёма памяти. Обычно не поднимают этот параметр выше 8 ГБайт.  
