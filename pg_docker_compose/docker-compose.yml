@@ -1,0 +1,29 @@
+version: '3.6'
+services:
+  postgres:
+    image: postgres:12.5
+    environment:
+      POSTGRES_DB: grafana
+      POSTGRES_USER: grafana
+      POSTGRES_PASSWORD: e366311e-828a-4433-862e-0cc20bcf197c
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U grafana"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - monitoring
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: 3
+          memory: 12G
+networks:
+  monitoring:
+    name: monitoring
