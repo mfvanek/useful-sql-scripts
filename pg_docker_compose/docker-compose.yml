@@ -46,7 +46,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: 3
+          cpus: '3'
           memory: 12G
 networks:
   monitoring:
