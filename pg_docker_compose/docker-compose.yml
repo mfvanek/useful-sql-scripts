@@ -48,6 +48,22 @@ services:
         limits:
           cpus: '3'
           memory: 12G
+
+  exporter:
+    image: prometheuscommunity/postgres-exporter:v0.9.0
+    environment:
+      DATA_SOURCE_URI: "postgres:5432/grafana?sslmode=disable"
+      DATA_SOURCE_USER: grafana
+      DATA_SOURCE_PASS: e366311e-828a-4433-862e-0cc20bcf197c
+    ports:
+      - 9187:9187
+    networks:
+      - monitoring
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_started
+
 networks:
   monitoring:
     name: monitoring

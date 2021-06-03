@@ -1,1 +1,2 @@
 /.idea/
+/pg_docker_compose/postgres-data/
