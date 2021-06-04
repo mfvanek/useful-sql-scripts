@@ -3,6 +3,11 @@
 docker-compose --project-name=my_pg up -d --build
 ```
 
+## Enable pg_stat_statements
+```sql
+create extension if not exists pg_stat_statements;
+```
+
 # Stop
 ```
 docker-compose --project-name=my_pg down
