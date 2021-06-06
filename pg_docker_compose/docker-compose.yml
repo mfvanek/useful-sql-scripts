@@ -38,7 +38,7 @@ services:
       POSTGRES_PASSWORD: e366311e-828a-4433-862e-0cc20bcf197c
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
-      - ./create_extensions.sql:/docker-entrypoint-initdb.d/create_extensions.sql
+      - ./create_extensions.sql:/docker-entrypoint-initdb.d/create_extensions.sql:ro
     ports:
       - 5432:5432
     healthcheck:
@@ -58,15 +58,22 @@ services:
 
   postgres_exporter:
     image: prometheuscommunity/postgres-exporter:v0.9.0
+    command: --log.level=debug
     environment:
       DATA_SOURCE_URI: "postgres:5432/grafana?sslmode=disable"
       DATA_SOURCE_USER: grafana
       DATA_SOURCE_PASS: e366311e-828a-4433-862e-0cc20bcf197c
+      PG_EXPORTER_EXTEND_QUERY_PATH: "/etc/postgres_exporter/queries.yaml"
+    volumes:
+      - ./queries.yaml:/etc/postgres_exporter/queries.yaml:ro
     ports:
       - 9187:9187
     networks:
       - monitoring
     restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_started
 
 networks:
   monitoring:
