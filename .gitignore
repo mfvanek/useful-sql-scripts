@@ -2,3 +2,4 @@
 /pg_docker_compose/postgres-data/
 /running_pg_in_docker/3. Where is my data/pgdata/
 /running_pg_in_docker/4. Healthcheck and limits/pgdata/
+/running_pg_in_docker/5. Tuning parameters/pgdata/
