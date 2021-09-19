@@ -5,3 +5,5 @@
 /running_pg_in_docker/5. Tuning parameters/pgdata/
 /running_pg_in_docker/6. UI via pgAdmin/pgadmin/
 /running_pg_in_docker/6. UI via pgAdmin/pgdata/
+/running_pg_in_docker/7. Monitoring with postgres_exporter/pgdata/
+/running_pg_in_docker/7. Monitoring with postgres_exporter/pgadmin/

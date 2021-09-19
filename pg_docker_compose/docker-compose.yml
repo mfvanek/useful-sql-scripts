@@ -67,7 +67,7 @@ services:
     volumes:
       - ./queries.yaml:/etc/postgres_exporter/queries.yaml:ro
     ports:
-      - 9187:9187
+      - "9187:9187"
     networks:
       - monitoring
     restart: unless-stopped
