@@ -169,3 +169,15 @@ from pg_catalog.pg_statio_all_tables as st
          right outer join information_schema.columns c on (pgd.objsubid=c.ordinal_position and  c.table_schema=st.schemaname and c.table_name=st.relname)
 where table_schema = 'public';
 ```
+
+### Tables without description
+```sql
+select psat.relid::regclass::text as table_name,
+       psat.schemaname as schema_name
+from pg_catalog.pg_stat_all_tables psat
+where
+    (obj_description(psat.relid) is null or length(trim(obj_description(psat.relid))) = 0)
+  and position('flyway_schema_history' in psat.relid::regclass::text) <= 0
+and psat.schemaname not in ('information_schema', 'pg_catalog', 'pg_toast')
+order by 1;
+```
