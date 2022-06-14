@@ -181,3 +181,19 @@ where
 and psat.schemaname not in ('information_schema', 'pg_catalog', 'pg_toast')
 order by 1;
 ```
+
+### Columns without description
+```sql
+select t.oid::regclass::text as table_name,
+       col.attname::text as column_name
+from pg_catalog.pg_class t
+         join pg_catalog.pg_namespace nsp on nsp.oid = t.relnamespace
+         join pg_catalog.pg_attribute col on (col.attrelid = t.oid)
+where t.relkind = 'r' and
+        col.attnum > 0 and /* to filter out system columns such as oid, ctid, xmin, xmax, etc.*/
+        --nsp.nspname = :schema_name_param::text and
+        position('flyway_schema_history' in t.oid::regclass::text) <= 0 and
+        nsp.nspname not in ('information_schema', 'pg_catalog', 'pg_toast') and
+    col_description(t.oid, col.attnum) is null
+order by 1, 2;
+```
