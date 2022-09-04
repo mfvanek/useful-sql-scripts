@@ -1,0 +1,57 @@
+version: "3.9"
+services:
+  pg-0:
+    container_name: postgres_primary
+    image: docker.io/bitnami/postgresql-repmgr:14.5.0
+    ports:
+      - "5432"
+    volumes:
+      - ./pg_0_data:/bitnami/postgresql
+    environment:
+      - POSTGRESQL_POSTGRES_PASSWORD=adminpgpwd4habr
+      - POSTGRESQL_USERNAME=habrpguser
+      - POSTGRESQL_PASSWORD=pgpwd4habr
+      - POSTGRESQL_DATABASE=habrdb
+      - REPMGR_PASSWORD=repmgrpassword
+      - REPMGR_PRIMARY_HOST=pg-0
+      - REPMGR_PRIMARY_PORT=5432
+      - REPMGR_PARTNER_NODES=pg-0,pg-1:5432
+      - REPMGR_NODE_NAME=pg-0
+      - REPMGR_NODE_NETWORK_NAME=pg-0
+      - REPMGR_PORT_NUMBER=5432
+      - REPMGR_CONNECT_TIMEOUT=1
+      - REPMGR_RECONNECT_ATTEMPTS=2
+      - REPMGR_RECONNECT_INTERVAL=1
+      - REPMGR_MASTER_RESPONSE_TIMEOUT=5
+    networks:
+      - postgres-ha
+
+  pg-1:
+    container_name: postgres_replica
+    image: docker.io/bitnami/postgresql-repmgr:14.5.0
+    ports:
+      - "5432"
+    volumes:
+      - ./pg_1_data:/bitnami/postgresql
+    environment:
+      - POSTGRESQL_POSTGRES_PASSWORD=adminpgpwd4habr
+      - POSTGRESQL_USERNAME=habrpguser
+      - POSTGRESQL_PASSWORD=pgpwd4habr
+      - POSTGRESQL_DATABASE=habrdb
+      - REPMGR_PASSWORD=repmgrpassword
+      - REPMGR_PRIMARY_HOST=pg-0
+      - REPMGR_PRIMARY_PORT=5432
+      - REPMGR_PARTNER_NODES=pg-0,pg-1:5432
+      - REPMGR_NODE_NAME=pg-1
+      - REPMGR_NODE_NETWORK_NAME=pg-1
+      - REPMGR_PORT_NUMBER=5432
+      - REPMGR_CONNECT_TIMEOUT=1
+      - REPMGR_RECONNECT_ATTEMPTS=2
+      - REPMGR_RECONNECT_INTERVAL=1
+      - REPMGR_MASTER_RESPONSE_TIMEOUT=5
+    networks:
+      - postgres-ha
+
+networks:
+  postgres-ha:
+    driver: bridge

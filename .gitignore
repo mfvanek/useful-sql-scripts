@@ -7,3 +7,5 @@
 /running_pg_in_docker/6. UI via pgAdmin/pgdata/
 /running_pg_in_docker/7. Monitoring with postgres_exporter/pgdata/
 /running_pg_in_docker/7. Monitoring with postgres_exporter/pgadmin/
+/running_pg_cluster_in_docker/1. Hello Postgres cluster/pg_0_data/
+/running_pg_cluster_in_docker/1. Hello Postgres cluster/pg_1_data/
