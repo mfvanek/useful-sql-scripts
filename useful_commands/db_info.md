@@ -197,3 +197,20 @@ where t.relkind = 'r' and
     col_description(t.oid, col.attnum) is null
 order by 1, 2;
 ```
+
+### Index detailed info
+```sql
+select
+    x.indrelid::regclass as table_name,
+    x.indexrelid::regclass as index_name,
+    x.indisunique as is_unique,
+    x.indisvalid as is_valid,
+    x.indnatts as columns_count,
+    pg_get_indexdef(x.indexrelid) as index_definition
+from
+    pg_catalog.pg_index x
+        join pg_catalog.pg_stat_all_indexes psai on x.indexrelid = psai.indexrelid
+where
+        psai.schemaname = 'public'::text
+and x.indexrelid::regclass::text = 'target_index_name'::text;
+```
