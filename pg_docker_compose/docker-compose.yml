@@ -1,7 +1,7 @@
 version: '3.6'
 services:
   postgres:
-    image: postgres:12.5
+    image: postgres:14.5
     command:
       - "postgres"
       - "-c"
@@ -40,7 +40,7 @@ services:
       - ./postgres-data:/var/lib/postgresql/data
       - ./create_extensions.sql:/docker-entrypoint-initdb.d/create_extensions.sql:ro
     ports:
-      - 5432:5432
+      - '5432:5432'
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U grafana"]
       interval: 10s
@@ -57,7 +57,7 @@ services:
           memory: 12G
 
   postgres_exporter:
-    image: prometheuscommunity/postgres-exporter:v0.9.0
+    image: prometheuscommunity/postgres-exporter:v0.11.1
     command: --log.level=debug
     environment:
       DATA_SOURCE_URI: "postgres:5432/grafana?sslmode=disable"
@@ -67,13 +67,12 @@ services:
     volumes:
       - ./queries.yaml:/etc/postgres_exporter/queries.yaml:ro
     ports:
-      - "9187:9187"
+      - '9187:9187'
     networks:
       - monitoring
     restart: unless-stopped
     depends_on:
-      postgres:
-        condition: service_started
+      - postgres
 
 networks:
   monitoring:
