@@ -4,9 +4,10 @@ services:
     container_name: postgres_primary
     image: docker.io/bitnami/postgresql-repmgr:14.5.0
     ports:
-      - "5432"
+      - "6432:5432"
     volumes:
       - ./pg_0_data:/bitnami/postgresql
+      - ./create_extensions.sql:/docker-entrypoint-initdb.d/create_extensions.sql:ro
     environment:
       - POSTGRESQL_POSTGRES_PASSWORD=adminpgpwd4habr
       - POSTGRESQL_USERNAME=habrpguser
@@ -23,16 +24,18 @@ services:
       - REPMGR_RECONNECT_ATTEMPTS=2
       - REPMGR_RECONNECT_INTERVAL=1
       - REPMGR_MASTER_RESPONSE_TIMEOUT=5
+    restart: unless-stopped
     networks:
       - postgres-ha
 
   pg-1:
-    container_name: postgres_replica
+    container_name: postgres_secondary
     image: docker.io/bitnami/postgresql-repmgr:14.5.0
     ports:
-      - "5432"
+      - "6433:5432"
     volumes:
       - ./pg_1_data:/bitnami/postgresql
+      - ./create_extensions.sql:/docker-entrypoint-initdb.d/create_extensions.sql:ro
     environment:
       - POSTGRESQL_POSTGRES_PASSWORD=adminpgpwd4habr
       - POSTGRESQL_USERNAME=habrpguser
@@ -49,8 +52,47 @@ services:
       - REPMGR_RECONNECT_ATTEMPTS=2
       - REPMGR_RECONNECT_INTERVAL=1
       - REPMGR_MASTER_RESPONSE_TIMEOUT=5
+    restart: unless-stopped
     networks:
       - postgres-ha
+
+  pg_exporter-0:
+    container_name: pg_exporter_primary
+    image: prometheuscommunity/postgres-exporter:v0.11.1
+    command: --log.level=debug
+    environment:
+      DATA_SOURCE_URI: "pg-0:5432/habrdb?sslmode=disable"
+      DATA_SOURCE_USER: habrpguser
+      DATA_SOURCE_PASS: pgpwd4habr
+      PG_EXPORTER_EXTEND_QUERY_PATH: "/etc/postgres_exporter/queries.yaml"
+    volumes:
+      - ./queries.yaml:/etc/postgres_exporter/queries.yaml:ro
+    ports:
+      - '9187:9187'
+    networks:
+      - postgres-ha
+    restart: unless-stopped
+    depends_on:
+      - pg-0
+
+  pg_exporter-1:
+    container_name: pg_exporter_secondary
+    image: prometheuscommunity/postgres-exporter:v0.11.1
+    command: --log.level=debug
+    environment:
+      DATA_SOURCE_URI: "pg-1:5432/habrdb?sslmode=disable"
+      DATA_SOURCE_USER: habrpguser
+      DATA_SOURCE_PASS: pgpwd4habr
+      PG_EXPORTER_EXTEND_QUERY_PATH: "/etc/postgres_exporter/queries.yaml"
+    volumes:
+      - ./queries.yaml:/etc/postgres_exporter/queries.yaml:ro
+    ports:
+      - '9188:9187'
+    networks:
+      - postgres-ha
+    restart: unless-stopped
+    depends_on:
+      - pg-1
 
 networks:
   postgres-ha:
