@@ -1,38 +1,10 @@
 version: "3.9"
 services:
-  pg-0:
-    container_name: postgres_primary
+  pg-1:
+    container_name: postgres_1
     image: docker.io/bitnami/postgresql-repmgr:14.5.0
     ports:
       - "6432:5432"
-    volumes:
-      - ./pg_0_data:/bitnami/postgresql
-      - ./create_extensions.sql:/docker-entrypoint-initdb.d/create_extensions.sql:ro
-    environment:
-      - POSTGRESQL_POSTGRES_PASSWORD=adminpgpwd4habr
-      - POSTGRESQL_USERNAME=habrpguser
-      - POSTGRESQL_PASSWORD=pgpwd4habr
-      - POSTGRESQL_DATABASE=habrdb
-      - REPMGR_PASSWORD=repmgrpassword
-      - REPMGR_PRIMARY_HOST=pg-0
-      - REPMGR_PRIMARY_PORT=5432
-      - REPMGR_PARTNER_NODES=pg-0,pg-1:5432
-      - REPMGR_NODE_NAME=pg-0
-      - REPMGR_NODE_NETWORK_NAME=pg-0
-      - REPMGR_PORT_NUMBER=5432
-      - REPMGR_CONNECT_TIMEOUT=1
-      - REPMGR_RECONNECT_ATTEMPTS=2
-      - REPMGR_RECONNECT_INTERVAL=1
-      - REPMGR_MASTER_RESPONSE_TIMEOUT=5
-    restart: unless-stopped
-    networks:
-      - postgres-ha
-
-  pg-1:
-    container_name: postgres_secondary
-    image: docker.io/bitnami/postgresql-repmgr:14.5.0
-    ports:
-      - "6433:5432"
     volumes:
       - ./pg_1_data:/bitnami/postgresql
       - ./create_extensions.sql:/docker-entrypoint-initdb.d/create_extensions.sql:ro
@@ -42,9 +14,9 @@ services:
       - POSTGRESQL_PASSWORD=pgpwd4habr
       - POSTGRESQL_DATABASE=habrdb
       - REPMGR_PASSWORD=repmgrpassword
-      - REPMGR_PRIMARY_HOST=pg-0
+      - REPMGR_PRIMARY_HOST=pg-1
       - REPMGR_PRIMARY_PORT=5432
-      - REPMGR_PARTNER_NODES=pg-0,pg-1:5432
+      - REPMGR_PARTNER_NODES=pg-1,pg-2:5432
       - REPMGR_NODE_NAME=pg-1
       - REPMGR_NODE_NETWORK_NAME=pg-1
       - REPMGR_PORT_NUMBER=5432
@@ -56,12 +28,40 @@ services:
     networks:
       - postgres-ha
 
-  pg_exporter-0:
-    container_name: pg_exporter_primary
+  pg-2:
+    container_name: postgres_2
+    image: docker.io/bitnami/postgresql-repmgr:14.5.0
+    ports:
+      - "6433:5432"
+    volumes:
+      - ./pg_2_data:/bitnami/postgresql
+      - ./create_extensions.sql:/docker-entrypoint-initdb.d/create_extensions.sql:ro
+    environment:
+      - POSTGRESQL_POSTGRES_PASSWORD=adminpgpwd4habr
+      - POSTGRESQL_USERNAME=habrpguser
+      - POSTGRESQL_PASSWORD=pgpwd4habr
+      - POSTGRESQL_DATABASE=habrdb
+      - REPMGR_PASSWORD=repmgrpassword
+      - REPMGR_PRIMARY_HOST=pg-1
+      - REPMGR_PRIMARY_PORT=5432
+      - REPMGR_PARTNER_NODES=pg-1,pg-2:5432
+      - REPMGR_NODE_NAME=pg-2
+      - REPMGR_NODE_NETWORK_NAME=pg-2
+      - REPMGR_PORT_NUMBER=5432
+      - REPMGR_CONNECT_TIMEOUT=1
+      - REPMGR_RECONNECT_ATTEMPTS=2
+      - REPMGR_RECONNECT_INTERVAL=1
+      - REPMGR_MASTER_RESPONSE_TIMEOUT=5
+    restart: unless-stopped
+    networks:
+      - postgres-ha
+
+  pg_exporter-1:
+    container_name: pg_exporter_1
     image: prometheuscommunity/postgres-exporter:v0.11.1
     command: --log.level=debug
     environment:
-      DATA_SOURCE_URI: "pg-0:5432/habrdb?sslmode=disable"
+      DATA_SOURCE_URI: "pg-1:5432/habrdb?sslmode=disable"
       DATA_SOURCE_USER: habrpguser
       DATA_SOURCE_PASS: pgpwd4habr
       PG_EXPORTER_EXTEND_QUERY_PATH: "/etc/postgres_exporter/queries.yaml"
@@ -73,14 +73,14 @@ services:
       - postgres-ha
     restart: unless-stopped
     depends_on:
-      - pg-0
+      - pg-1
 
-  pg_exporter-1:
-    container_name: pg_exporter_secondary
+  pg_exporter-2:
+    container_name: pg_exporter_2
     image: prometheuscommunity/postgres-exporter:v0.11.1
     command: --log.level=debug
     environment:
-      DATA_SOURCE_URI: "pg-1:5432/habrdb?sslmode=disable"
+      DATA_SOURCE_URI: "pg-2:5432/habrdb?sslmode=disable"
       DATA_SOURCE_USER: habrpguser
       DATA_SOURCE_PASS: pgpwd4habr
       PG_EXPORTER_EXTEND_QUERY_PATH: "/etc/postgres_exporter/queries.yaml"
@@ -92,7 +92,7 @@ services:
       - postgres-ha
     restart: unless-stopped
     depends_on:
-      - pg-1
+      - pg-2
 
 networks:
   postgres-ha:

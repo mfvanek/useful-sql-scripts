@@ -17,6 +17,36 @@ show wal_level;
 ```
 Should be `wal_level = 'replica'`
 
+### How to inspect where the primary is
+```sql
+select case when pg_is_in_recovery() then 'secondary' else 'primary' end as host_status;
+```
+
+Without log in to psql:
+```bash
+psql -c "select case when pg_is_in_recovery() then 'secondary' else 'primary' end as host_status;" "dbname=habrdb user=habrpguser password=pgpwd4habr"
+```
+
+## How to manually init failover
+
+### Stop container with current primary
+```bash
+docker stop postgres_1
+```
+
+### Ensure replica has been promoted to primary
+See containers logs and wait for
+```
+LOG:  database system was not properly shut down; automatic recovery in progress
+…
+LOG:  database system is ready to accept connections
+```
+
+### Return the first host to the cluster
+```bash
+docker start postgres_1
+```
+
 ## repmgr docs
 https://repmgr.org/docs/repmgr.html
 
