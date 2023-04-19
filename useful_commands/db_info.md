@@ -1,11 +1,11 @@
-## Получение информации о базе данных
+## Getting information about the PostgreSQL database
 
-### Состояние репликации, список реплик (сихронных\асинхронных)
+### Replication status, list of replicas (synchronous\asynchronous)
 ```sql
 select * from pg_stat_replication;
 ```
 
-### Определить состояние хоста
+### Determines the state of the host (primary/secondary)
 ```sql
 SELECT
     NOT pg_is_in_recovery(),
@@ -15,8 +15,7 @@ SELECT
         ELSE 0 END
     )
 ```
-```pg_is_in_recovery()``` - возвращает false на мастере и true - на репликах.
-```now() - pg_last_xact_replay_timestamp()``` - возвращает разницу между текущим временем и меткой последней проигранной транзакции.
+```pg_is_in_recovery()``` - return **false** on primary host and **true** - on replicas.
 
 ### Отставание реплики
 ```sql
@@ -213,4 +212,19 @@ from
 where
         psai.schemaname = 'public'::text
 and x.indexrelid::regclass::text = 'target_index_name'::text;
+```
+
+### Finds objects (e.g. indexes, constraints) that depend on a specific column
+```sql
+select
+    d.classid::regclass as owning_object_type,
+    d.objid::regclass as owning_object,
+    d.refobjid::regclass as dependent_object,
+    a.attname as dependent_column,
+    d.deptype -- see https://www.postgresql.org/docs/current/catalog-pg-depend.html
+from pg_catalog.pg_depend d
+    left join pg_catalog.pg_attribute a on d.refobjid = a.attrelid and d.refobjsubid = a.attnum
+where
+    refobjid = 'target_table_name'::regclass and
+    a.attname = 'target_column_name';
 ```
