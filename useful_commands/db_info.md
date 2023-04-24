@@ -1,4 +1,4 @@
-## Getting information about the PostgreSQL database
+## Getting information about PostgreSQL database
 
 ### Replication status, list of replicas (synchronous\asynchronous)
 ```sql

@@ -2,14 +2,22 @@
 
 ## Docker Compose
 ### Start
-`docker-compose --project-name="habr-pg-ha-14" up -d`
+```shell
+docker-compose --project-name="habr-pg-ha-14" up -d
+```
 
 ### Stop
-`docker-compose --project-name="habr-pg-ha-14" down`
+```shell
+docker-compose --project-name="habr-pg-ha-14" down
+```
 
 ### Run psql
-`psql -U postgres -d habrdb`  
-`psql -U habrpguser -d habrdb`
+```shell
+psql -U postgres -d habrdb
+```
+```shell
+psql -U habrpguser -d habrdb
+```
 
 See:
 ```sql
@@ -23,14 +31,14 @@ select case when pg_is_in_recovery() then 'secondary' else 'primary' end as host
 ```
 
 Without log in to psql:
-```bash
+```shell
 psql -c "select case when pg_is_in_recovery() then 'secondary' else 'primary' end as host_status;" "dbname=habrdb user=habrpguser password=pgpwd4habr"
 ```
 
 ## How to manually init failover
 
 ### Stop container with current primary
-```bash
+```shell
 docker stop postgres_1
 ```
 
@@ -43,7 +51,7 @@ LOG:  database system is ready to accept connections
 ```
 
 ### Return the first host to the cluster
-```bash
+```shell
 docker start postgres_1
 ```
 
