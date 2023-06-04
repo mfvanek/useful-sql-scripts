@@ -23,8 +23,5 @@ docker volume ls
 ### Delete specified volume
 ```shell
 docker volume rm habr-pg-14_habrdb-data
-```
-
-```shell
 docker volume rm habr-pg-14_pgadmin-data
 ```
