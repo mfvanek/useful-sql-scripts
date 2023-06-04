@@ -1,7 +1,7 @@
 version: "3.9"
 services:
   postgres:
-    image: postgres:14.5
+    image: postgres:14.8-alpine3.18
     command:
       - "postgres"
       - "-c"
@@ -39,7 +39,7 @@ services:
       PGDATA: "/var/lib/postgresql/data/pgdata"
     volumes:
       - ../2. Init Database:/docker-entrypoint-initdb.d
-      - .:/var/lib/postgresql/data
+      - habrdb-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     healthcheck:
@@ -54,3 +54,6 @@ services:
         limits:
           cpus: '1'
           memory: 4G
+
+volumes:
+  habrdb-data:

@@ -2,11 +2,11 @@ version: "3.9"
 services:
   pg-1:
     container_name: postgres_1
-    image: docker.io/bitnami/postgresql-repmgr:14.5.0
+    image: docker.io/bitnami/postgresql-repmgr:14.9.0
     ports:
       - "6432:5432"
     volumes:
-      - ./pg_1_data:/bitnami/postgresql
+      - pg_1_data:/bitnami/postgresql
       - ./create_extensions.sql:/docker-entrypoint-initdb.d/create_extensions.sql:ro
     environment:
       - POSTGRESQL_POSTGRES_PASSWORD=adminpgpwd4habr
@@ -30,11 +30,11 @@ services:
 
   pg-2:
     container_name: postgres_2
-    image: docker.io/bitnami/postgresql-repmgr:14.5.0
+    image: docker.io/bitnami/postgresql-repmgr:14.9.0
     ports:
       - "6433:5432"
     volumes:
-      - ./pg_2_data:/bitnami/postgresql
+      - pg_2_data:/bitnami/postgresql
       - ./create_extensions.sql:/docker-entrypoint-initdb.d/create_extensions.sql:ro
     environment:
       - POSTGRESQL_POSTGRES_PASSWORD=adminpgpwd4habr
@@ -68,7 +68,7 @@ services:
     volumes:
       - ./queries.yaml:/etc/postgres_exporter/queries.yaml:ro
     ports:
-      - '9187:9187'
+      - "9187:9187"
     networks:
       - postgres-ha
     restart: unless-stopped
@@ -87,7 +87,7 @@ services:
     volumes:
       - ./queries.yaml:/etc/postgres_exporter/queries.yaml:ro
     ports:
-      - '9188:9187'
+      - "9188:9187"
     networks:
       - postgres-ha
     restart: unless-stopped
@@ -97,3 +97,7 @@ services:
 networks:
   postgres-ha:
     driver: bridge
+
+volumes:
+  pg_1_data:
+  pg_2_data:
