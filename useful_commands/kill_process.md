@@ -1,5 +1,6 @@
 # System Administration Functions
-[Doc](https://postgrespro.ru/docs/postgrespro/10/functions-admin)
+[Doc ENG](https://www.postgresql.org/docs/current/functions-admin.html)  
+[Doc RUS](https://postgrespro.ru/docs/postgresql/15/functions-admin)
 
 ## Option 1
 ```
@@ -23,7 +24,7 @@ BEGIN
 END$$;
 ```
 
-## Зависшие запросы
+## Hung requests (Зависшие запросы)
 ```
 select (now() - xact_start)::time as xact_age,
        (now() - query_start)::time as query_age,

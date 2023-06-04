@@ -1,4 +1,4 @@
-# Оптимизация производительности PostgreSQL
+# PostgreSQL Performance Optimization (Оптимизация производительности PostgreSQL)
 
 Ниже перечислены основные параметры, на которые следует обратить внимание при оптимизации производительности PostgreSQL.
 
@@ -25,7 +25,7 @@ show max_wal_size;
 show work_mem;
 ```
 
-[См.](https://www.citusdata.com/blog/2018/06/12/configuring-work-mem-on-postgres/)
+[См.](https://www.citusdata.com/blog/2018/06/12/configuring-work-mem-on-postgres/)  
 [См. также](https://www.depesz.com/2011/07/03/understanding-postgresql-conf-work_mem/)
 
 ### maintenance_work_mem

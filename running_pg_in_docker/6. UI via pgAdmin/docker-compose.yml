@@ -2,7 +2,7 @@ version: "3.9"
 services:
   postgres:
     container_name: postgres_container
-    image: postgres:14.5
+    image: postgres:14.8-alpine3.18
     command:
       - "postgres"
       - "-c"
@@ -40,7 +40,7 @@ services:
       PGDATA: "/var/lib/postgresql/data/pgdata"
     volumes:
       - ../2. Init Database:/docker-entrypoint-initdb.d
-      - .:/var/lib/postgresql/data
+      - habrdb-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     healthcheck:
@@ -60,13 +60,13 @@ services:
 
   pgadmin:
     container_name: pgadmin_container
-    image: dpage/pgadmin4:5.7
+    image: dpage/pgadmin4:7.2
     environment:
       PGADMIN_DEFAULT_EMAIL: "habrpguser@habr.com"
       PGADMIN_DEFAULT_PASSWORD: "pgadminpwd4habr"
       PGADMIN_CONFIG_SERVER_MODE: "False"
     volumes:
-      - ./pgadmin:/var/lib/pgadmin
+      - pgadmin-data:/var/lib/pgadmin
     ports:
       - "5050:80"
     restart: unless-stopped
@@ -77,6 +77,10 @@ services:
           memory: 1G
     networks:
       - postgres
+
+volumes:
+  habrdb-data:
+  pgadmin-data:
 
 networks:
   postgres:
