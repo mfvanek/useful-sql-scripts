@@ -60,13 +60,13 @@ services:
 
   pgadmin:
     container_name: pgadmin_container
-    image: dpage/pgadmin4:5.7
+    image: dpage/pgadmin4:7.2
     environment:
       PGADMIN_DEFAULT_EMAIL: "habrpguser@habr.com"
       PGADMIN_DEFAULT_PASSWORD: "pgadminpwd4habr"
       PGADMIN_CONFIG_SERVER_MODE: "False"
     volumes:
-      - ./pgadmin:/var/lib/pgadmin
+      - pgadmin-data:/var/lib/pgadmin
     ports:
       - "5050:80"
     restart: unless-stopped
@@ -80,6 +80,7 @@ services:
 
 volumes:
   habrdb-data:
+  pgadmin-data:
 
 networks:
   postgres:

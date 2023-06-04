@@ -66,7 +66,7 @@ services:
       PGADMIN_DEFAULT_PASSWORD: "pgadminpwd4habr"
       PGADMIN_CONFIG_SERVER_MODE: "False"
     volumes:
-      - ./pgadmin:/var/lib/pgadmin
+      - pgadmin-data:/var/lib/pgadmin
     ports:
       - "5050:80"
     restart: unless-stopped
@@ -80,7 +80,7 @@ services:
 
   postgres_exporter:
     container_name: exporter_container
-    image: prometheuscommunity/postgres-exporter:v0.10.0
+    image: prometheuscommunity/postgres-exporter:v0.10.1
     environment:
       DATA_SOURCE_URI: "postgres:5432/habrdb?sslmode=disable"
       DATA_SOURCE_USER: "habrpguser"
@@ -101,6 +101,7 @@ services:
 
 volumes:
   habrdb-data:
+  pgadmin-data:
 
 networks:
   postgres:
