@@ -80,7 +80,7 @@ services:
 
   postgres_exporter:
     container_name: exporter_container
-    image: prometheuscommunity/postgres-exporter:v0.10.1
+    image: prometheuscommunity/postgres-exporter:v0.15.0
     environment:
       DATA_SOURCE_URI: "postgres:5432/habrdb?sslmode=disable"
       DATA_SOURCE_USER: "habrpguser"
