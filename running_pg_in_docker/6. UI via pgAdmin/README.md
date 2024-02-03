@@ -3,12 +3,12 @@
 ## Docker Compose
 ### Start
 ```shell
-docker-compose --project-name="habr-pg-14" up -d
+docker-compose --project-name="habr-pg-16" up -d
 ```
 
 ### Stop
 ```shell
-docker-compose --project-name="habr-pg-14" down
+docker-compose --project-name="habr-pg-16" down
 ```
 
 ## Access to PgAdmin
@@ -22,6 +22,6 @@ docker volume ls
 
 ### Delete specified volume
 ```shell
-docker volume rm habr-pg-14_habrdb-data
-docker volume rm habr-pg-14_pgadmin-data
+docker volume rm habr-pg-16_habrdb-data
+docker volume rm habr-pg-16_pgadmin-data
 ```

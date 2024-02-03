@@ -1,10 +1,10 @@
 version: "3.9"
 services:
   postgres:
-    image: postgres:14.8-alpine3.18
+    image: postgres:16.1-alpine3.18
     environment:
       POSTGRES_DB: "habrdb"
       POSTGRES_USER: "habrpguser"
       POSTGRES_PASSWORD: "pgpwd4habr"
     ports:
-      - "5432:5432"
+      - "6432:5432"

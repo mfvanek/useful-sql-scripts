@@ -2,7 +2,7 @@ version: "3.9"
 services:
   postgres:
     container_name: postgres_container
-    image: postgres:14.8-alpine3.18
+    image: postgres:16.1-alpine3.18
     command:
       - "postgres"
       - "-c"
@@ -42,7 +42,7 @@ services:
       - ../2. Init Database:/docker-entrypoint-initdb.d
       - habrdb-data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "6432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U habrpguser -d habrdb"]
       interval: 10s
