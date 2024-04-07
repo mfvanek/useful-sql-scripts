@@ -1,52 +1,66 @@
 ## Getting information about PostgreSQL database
 
 ### Replication status, list of replicas (synchronous\asynchronous)
+
 ```sql
 select * from pg_stat_replication;
 ```
 
 ### Determines the state of the host (primary/secondary)
+
 ```sql
-SELECT
-    NOT pg_is_in_recovery(),
+select
+    not pg_is_in_recovery(),
     (
-        CASE WHEN pg_is_in_recovery()
-        THEN COALESCE((EXTRACT(EPOCH FROM now() - pg_last_xact_replay_timestamp()) * 1000)::INTEGER, 0)
-        ELSE 0 END
+        case when pg_is_in_recovery()
+        then coalesce((extract(epoch from now() - pg_last_xact_replay_timestamp()) * 1000)::integer, 0)
+        else 0 end
     )
 ```
-```pg_is_in_recovery()``` - return **false** on primary host and **true** - on replicas.
 
-### Отставание реплики
+`pg_is_in_recovery()` returns:
+- **false** on primary host and
+- **true** on replicas.
+
+### Replication lag (Отставание реплики)
+
 ```sql
 select pg_wal_lsn_diff(pg_current_wal_lsn(),restart_lsn) as lag_in_bytes, slot_name, slot_type
 from pg_replication_slots
 where active;
 ```
 
-### Размер базы данных
+### Database size (Размер базы данных)
 
-Чтобы получить физический размер файлов (хранилища) базы данных, используем следующий запрос:
-```sql
-SELECT pg_database_size(current_database());
-```
-Результат будет представлен как число вида **41809016**.  
-[current_database()](https://postgrespro.ru/docs/postgrespro/9.5/functions-info) — функция, которая возвращает имя текущей базы данных.  
+To get the physical size of the database files (storage), use the following query:
 
-Вместо неё можно ввести имя текстом:
 ```sql
-SELECT pg_database_size('my_database');
+select pg_database_size(current_database());
 ```
 
-Для того, чтобы получить информацию в человекочитаемом виде, используем функцию [pg_size_pretty](https://postgrespro.ru/docs/postgrespro/9.5/functions-admin):
-```sql
-SELECT pg_size_pretty(pg_database_size(current_database()));
-```
-В результате получим информацию вида **40 Mb**.
+The result will be represented as a number of the form **41809016**.  
+[current_database()](https://www.postgresql.org/docs/16/functions-info.html)
+— a function that returns the name of the current database.
 
-#### Для всех баз данных
+Instead, you can enter the name explicitly:
+
 ```sql
-SELECT pg_database.datname, pg_size_pretty(pg_database_size(pg_database.datname)) AS size FROM pg_database;
+select pg_database_size('my_database');
+```
+
+In order to get information in human-readable form, we use the function
+[pg_size_pretty()](https://www.postgresql.org/docs/16/functions-admin.html#FUNCTIONS-ADMIN-DBOBJECT):
+
+```sql
+select pg_size_pretty(pg_database_size(current_database()));
+```
+
+As a result, we get information like **40 Mb**.
+
+#### Databases size for entire cluster
+
+```sql
+select pg_database.datname, pg_size_pretty(pg_database_size(pg_database.datname)) as size from pg_database;
 ```
 
 ### Перечень таблиц
@@ -116,25 +130,29 @@ SELECT relname, relpages FROM pg_class ORDER BY relpages DESC LIMIT 1;
 - **relpages** — размер представления этой таблицы на диске в количествах страниц (по умолчанию одна страницы равна 8 Кб).
 - **pg_class** — системная таблица, которая содержит информацию о связях таблиц базы данных.
 
-### Перечень подключенных пользователей
-Чтобы узнать имя, IP и используемый порт подключенных пользователей, выполним следующий запрос:
+### List of connected users (Перечень подключенных пользователей)
+
+To find out the name, IP and port of the connected users, run the following query:
 ```sql
-SELECT datname,usename,client_addr,client_port FROM pg_stat_activity;
+select datname,usename,client_addr,client_port from pg_stat_activity;
 ```
 
-### Активность пользователя
-Чтобы узнать активность соединения конкретного пользователя, используем следующий запрос:
+### User activity (Активность пользователя)
+
+To find out the connection activity of a specific user, use the following query:
 ```sql
-SELECT datname FROM pg_stat_activity WHERE usename = 'devuser';
+select datname from pg_stat_activity where usename = 'devuser';
 ```
 
 ### Connection limit per user
+
 ```sql
 select rolname, rolconnlimit from pg_roles where rolconnlimit <> -1;
 ```
-See [pg_roles](https://postgrespro.ru/docs/postgrespro/10/view-pg-roles)
+See [pg_roles](https://www.postgresql.org/docs/16/view-pg-roles.html)
 
 ### Roles hierarchy
+
 ```
 SELECT r.rolname, r.rolsuper, r.rolinherit,
        r.rolcreaterole, r.rolcreatedb, r.rolcanlogin,
@@ -150,6 +168,7 @@ ORDER BY 1;
 ```
 
 ### Amount of dead and live tuples
+
 ```sql
 select relname as objectname, pg_stat_get_live_tuples(c.oid) as livetuples, pg_stat_get_dead_tuples(c.oid) as deadtuples
 from pg_class c where relname = 'order_item';
@@ -160,6 +179,7 @@ select * from pg_stat_all_tables where relname='order_item';
 ```
 
 ### Columns info
+
 ```sql
 select table_name,
        c.column_name, c.data_type, coalesce(c.numeric_precision, c.character_maximum_length) as maximum_length, c.numeric_scale
@@ -170,6 +190,7 @@ where table_schema = 'public';
 ```
 
 ### Tables without description
+
 ```sql
 select psat.relid::regclass::text as table_name,
        psat.schemaname as schema_name
@@ -182,6 +203,7 @@ order by 1;
 ```
 
 ### Columns without description
+
 ```sql
 select t.oid::regclass::text as table_name,
        col.attname::text as column_name
@@ -198,6 +220,7 @@ order by 1, 2;
 ```
 
 ### Index detailed info
+
 ```sql
 select
     x.indrelid::regclass as table_name,
@@ -215,6 +238,7 @@ and x.indexrelid::regclass::text = 'target_index_name'::text;
 ```
 
 ### Finds objects (e.g. indexes, constraints) that depend on a specific column
+
 ```sql
 select
     d.classid::regclass as owning_object_type,
