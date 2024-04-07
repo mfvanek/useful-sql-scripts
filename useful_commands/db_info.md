@@ -188,3 +188,15 @@ where
     refobjid = 'target_table_name'::regclass and
     a.attname = 'target_column_name';
 ```
+
+### Find rows size in a table
+
+```sql
+select
+    r.id as row_id,
+    pg_size_pretty(sum(pg_column_size(r.*))) as row_size
+from <table_name> as r
+group by r.id
+order by sum(pg_column_size(r.*)) desc
+limit 10
+```
