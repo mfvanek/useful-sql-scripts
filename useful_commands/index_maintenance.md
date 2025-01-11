@@ -1,5 +1,6 @@
 # Index Maintenance
-Partially based on [wiki](https://wiki.postgresql.org/wiki/Index_Maintenance) and [this video](https://youtu.be/aaecM4wKdhY)
+
+Partially based on [wiki](https://wiki.postgresql.org/wiki/Index_Maintenance) and [this video](https://www.youtube.com/watch?v=aaecM4wKdhY)
 
 ## Index summary
 ```sql
@@ -288,4 +289,14 @@ where contype = 'f' and
       )
 group by c.conrelid, c.conname, c.oid
 order by (c.conrelid::regclass)::text, columns;
+```
+
+### Deferred indexes (indexes that are created but cannot be used due to the presence of long transactions)
+
+More info [here](https://youtu.be/pTWfjyeQ5Ks?si=tHYFAw5DB6dU0VLX&t=1955)
+
+```sql
+select indexrelid::regclass as index_name, indcheckxmin
+from pg_index
+where indcheckxmin = true;
 ```
