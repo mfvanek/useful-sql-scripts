@@ -62,7 +62,7 @@ docker exec postgres_2 psql -c "select case when pg_is_in_recovery() then 'secon
 
 ### DB metrics
 
-Open in browser:
+Open in the browser:
 * [http://localhost:9187/metrics](http://localhost:9187/metrics)
 * [http://localhost:9188/metrics](http://localhost:9188/metrics)
 

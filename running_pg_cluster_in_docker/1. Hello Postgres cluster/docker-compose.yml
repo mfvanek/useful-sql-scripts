@@ -57,7 +57,7 @@ services:
 
   pg_exporter-1:
     container_name: pg_exporter_1
-    image: prometheuscommunity/postgres-exporter:v0.11.1
+    image: prometheuscommunity/postgres-exporter:v0.18.1
     command: --log.level=debug
     environment:
       DATA_SOURCE_URI: "pg-1:5432/habrdb?sslmode=disable"
@@ -68,15 +68,20 @@ services:
       - ./queries.yaml:/etc/postgres_exporter/queries.yaml:ro
     ports:
       - "9187:9187"
-    networks:
-      - postgres-ha
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: 500M
     depends_on:
       - pg-1
+    networks:
+      - postgres-ha
 
   pg_exporter-2:
     container_name: pg_exporter_2
-    image: prometheuscommunity/postgres-exporter:v0.11.1
+    image: prometheuscommunity/postgres-exporter:v0.18.1
     command: --log.level=debug
     environment:
       DATA_SOURCE_URI: "pg-2:5432/habrdb?sslmode=disable"
@@ -87,11 +92,16 @@ services:
       - ./queries.yaml:/etc/postgres_exporter/queries.yaml:ro
     ports:
       - "9188:9187"
-    networks:
-      - postgres-ha
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: 500M
     depends_on:
       - pg-2
+    networks:
+      - postgres-ha
 
 networks:
   postgres-ha:
