@@ -5,18 +5,18 @@
 ### Start
 
 ```shell
-docker-compose --project-name="habr-pg-16" up -d
+docker-compose --project-name="habr-pg-17" up -d
 ```
 
 ### Stop
 
 ```shell
-docker-compose --project-name="habr-pg-16" down
+docker-compose --project-name="habr-pg-17" down
 ```
 
 ## Access to PgAdmin
 
-Open in browser [http://localhost:5050](http://localhost:5050)
+Open in a browser [http://localhost:5050](http://localhost:5050)
 
 ## Add a new server in PgAdmin
 
@@ -37,6 +37,6 @@ docker volume ls
 ### Delete specified volume
 
 ```shell
-docker volume rm habr-pg-16_habrdb-data
-docker volume rm habr-pg-16_pgadmin-data
+docker volume rm habr-pg-17_habrdb-data
+docker volume rm habr-pg-17_pgadmin-data
 ```

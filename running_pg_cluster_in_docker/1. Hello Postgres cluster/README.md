@@ -1,17 +1,17 @@
-# The simplest way to run PostgreSQL cluster in Docker
+# The simplest way to run a PostgreSQL cluster in Docker
 
 ## Docker Compose
 
 ### Start
 
 ```shell
-docker-compose --project-name="habr-pg-ha-14" up -d
+docker-compose --project-name="habr-pg-ha-17" up -d
 ```
 
 ### Stop
 
 ```shell
-docker-compose --project-name="habr-pg-ha-14" down
+docker-compose --project-name="habr-pg-ha-17" down
 ```
 
 ### Explore volumes
@@ -22,8 +22,8 @@ docker volume ls
 
 #### Delete specified volume if need
 ```shell
-docker volume rm habr-pg-ha-14_pg_1_data
-docker volume rm habr-pg-ha-14_pg_2_data
+docker volume rm habr-pg-ha-17_pg_1_data
+docker volume rm habr-pg-ha-17_pg_2_data
 ```
 
 ### Run psql
@@ -68,7 +68,7 @@ Open in browser:
 
 ## How to manually init failover
 
-### Stop container with current primary
+### Stop container with the current primary
 
 ```shell
 docker stop postgres_1
@@ -76,7 +76,7 @@ docker stop postgres_1
 
 ### Ensure replica has been promoted to primary
 
-See containers logs and wait for
+See container logs and wait for
 
 ```
 LOG:  database system was not properly shut down; automatic recovery in progress

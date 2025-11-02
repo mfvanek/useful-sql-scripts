@@ -1,8 +1,7 @@
-version: "3.9"
 services:
   postgres:
     container_name: postgres_container
-    image: postgres:16.1-alpine3.18
+    image: postgres:17.6-alpine3.22
     command:
       - "postgres"
       - "-c"
@@ -60,7 +59,7 @@ services:
 
   pgadmin:
     container_name: pgadmin_container
-    image: dpage/pgadmin4:8.2
+    image: dpage/pgadmin4:9.9.0
     environment:
       PGADMIN_DEFAULT_EMAIL: "habrpguser@habr.com"
       PGADMIN_DEFAULT_PASSWORD: "pgadminpwd4habr"
