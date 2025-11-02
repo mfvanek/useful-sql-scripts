@@ -1,8 +1,7 @@
-version: "3.9"
 services:
   pg-1:
     container_name: postgres_1
-    image: docker.io/bitnami/postgresql-repmgr:14.9.0
+    image: docker.io/bitnamilegacy/postgresql-repmgr:17.6.0
     ports:
       - "6432:5432"
     volumes:
@@ -30,7 +29,7 @@ services:
 
   pg-2:
     container_name: postgres_2
-    image: docker.io/bitnami/postgresql-repmgr:14.9.0
+    image: docker.io/bitnamilegacy/postgresql-repmgr:17.6.0
     ports:
       - "6433:5432"
     volumes:

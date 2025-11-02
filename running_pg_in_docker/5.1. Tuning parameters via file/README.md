@@ -5,13 +5,13 @@
 ### Start
 
 ```shell
-docker-compose --project-name="habr-pg-16" up -d
+docker-compose --project-name="habr-pg-17" up -d
 ```
 
 ### Stop
 
 ```shell
-docker-compose --project-name="habr-pg-16" down
+docker-compose --project-name="habr-pg-17" down
 ```
 
 ### Run psql
